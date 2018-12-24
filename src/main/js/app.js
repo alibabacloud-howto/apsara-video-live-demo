@@ -1,5 +1,7 @@
-const React = require('react');
-const ReactDOM = require('react-dom');
+import 'bootstrap';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import '../resources/static/scss/app.scss';
 
 function App() {
     return <div id="app">Hello</div>;
