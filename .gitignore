@@ -1,0 +1,9 @@
+**/.idea
+**/*.iml
+**/target
+**/node_modules
+**/package-lock.json
+**/terraform.tfstate
+**/terraform.tfstate.backup
+**/.terraform
+src/main/resources/static/built
