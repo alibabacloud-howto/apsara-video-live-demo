@@ -9,7 +9,6 @@ export default class Navbar extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {};
     }
 
     render() {
@@ -27,18 +26,31 @@ export default class Navbar extends React.Component {
                     <div className="collapse navbar-collapse" id="navigation_bar_items">
                         <ul className="navbar-nav mr-auto">
                             <li className="nav-item">
-                                <a className="nav-link" href="/">Home</a>
+                                <a className={"nav-link " + (this.props.currentPage === 'home' ? 'active' : '')}
+                                   onClick={() => this.props.onItemSelected('home')} href="#">
+                                    Home
+                                </a>
                             </li>
                             <li className="nav-item">
-                                <a className="nav-link" href="/">Broadcast</a>
+                                <a className={"nav-link " + (this.props.currentPage === 'broadcast' ? 'active' : '')}
+                                   onClick={() => this.props.onItemSelected('broadcast')} href="#">
+                                    Broadcast
+                                </a>
                             </li>
                             <li className="nav-item">
-                                <a className="nav-link" href="/">Watch</a>
+                                <a className={"nav-link " + (this.props.currentPage === 'watch' ? 'active' : '')}
+                                   onClick={() => this.inviteUserToSelectStream()} href="#">
+                                    Watch
+                                </a>
                             </li>
                         </ul>
                     </div>
                 </div>
             </nav>
         );
+    }
+
+    inviteUserToSelectStream() {
+        alert('Please select a stream in the Home page.');
     }
 }

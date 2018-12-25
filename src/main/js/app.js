@@ -16,16 +16,32 @@ import '../resources/static/scss/app.scss';
 class App extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {errorMessage: ''};
+        this.state = {
+            errorMessage: '',
+            currentPage: 'home'
+        };
     }
 
     render() {
+        let pageElem;
+        switch (this.state.currentPage) {
+            case 'broadcast':
+                pageElem = <BroadcastPage onError={message => this.showErrorMessage(message)}/>;
+                break;
+            case 'home':
+            default:
+                pageElem = <HomePage
+                    onError={message => this.showErrorMessage(message)}
+                    onBroadcast={() => this.setCurrentPage('broadcast')}
+                    onStreamSelected={stream => console.log('TODO watch stream: ' + JSON.stringify(stream))}/>;
+                break;
+        }
+
         return (
             <div>
-                <Navbar/>
+                <Navbar currentPage={this.state.currentPage} onItemSelected={page => this.setCurrentPage(page)}/>
                 <ErrorPanel message={this.state.errorMessage}/>
-                <HomePage onError={message => this.showErrorMessage(message)}/>
-                <BroadcastPage/>
+                {pageElem}
             </div>
         );
     }
@@ -37,6 +53,15 @@ class App extends React.Component {
      */
     showErrorMessage(message) {
         this.setState({errorMessage: message});
+    }
+
+    /**
+     * Show the given page.
+     *
+     * @param {string} currentPage
+     */
+    setCurrentPage(currentPage) {
+        this.setState({currentPage: currentPage});
     }
 }
 

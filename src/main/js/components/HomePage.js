@@ -27,7 +27,9 @@ export default class HomePage extends React.Component {
         let streamElems = [];
         if (this.state.streams.length > 0) {
             streamElems = this.state.streams.map(stream =>
-                <li key={stream.id}><a href="watch.html#{stream.id}">{stream.name}</a></li>
+                <li key={stream.id}>
+                    <a href="#" onClick={() => this.props.onStreamSelected(stream)}>{stream.name}</a>
+                </li>
             );
         } else {
             streamElems = [<li key="no-stream">No stream for the moment.</li>];
@@ -54,7 +56,9 @@ export default class HomePage extends React.Component {
                 </div>
                 <div className="row justify-content-md-center">
                     <div className="col-md-3">
-                        <a href="broadcast.html" className="btn btn-primary w-100">Broadcast my video</a>
+                        <a href="#" className="btn btn-primary w-100" onClick={() => this.props.onBroadcast()}>
+                            Broadcast my video
+                        </a>
                     </div>
                 </div>
                 <div className="row">
