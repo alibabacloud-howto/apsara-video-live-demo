@@ -30,5 +30,22 @@ This demos is composed of the following systems:
 
 TODO show a schema about the "simplified" architecture.
 
+TODO: mention about scalable architecture and give contact email.
+
 ## Installation
 TODO Terraform script
+
+```bash
+export ALICLOUD_ACCESS_KEY="your-accesskey-id"
+export ALICLOUD_SECRET_KEY="your-accesskey-secret"
+export ALICLOUD_REGION="your-region-id"
+
+export TF_VAR_domain_name="your-domain.com"
+export TF_VAR_webapp_sub_domain_name="www"
+export TF_VAR_transcoding_sub_domain_name="transcoding"
+export TF_VAR_ecs_root_password="your-root-password"
+
+cd infrastructure
+terraform init
+terraform apply
+```
