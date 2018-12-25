@@ -1,3 +1,29 @@
+// Security group and rule
+resource "alicloud_security_group" "transcoding_security_group" {
+  name = "livevideo-security-group"
+  vpc_id = "${alicloud_vpc.app_vpc.id}"
+}
+resource "alicloud_security_group_rule" "accept_22_rule" {
+  type = "ingress"
+  ip_protocol = "tcp"
+  nic_type = "intranet"
+  policy = "accept"
+  port_range = "22/22"
+  priority = 1
+  security_group_id = "${alicloud_security_group.transcoding_security_group.id}"
+  cidr_ip = "0.0.0.0/0"
+}
+resource "alicloud_security_group_rule" "accept_80_rule" {
+  type = "ingress"
+  ip_protocol = "tcp"
+  nic_type = "intranet"
+  policy = "accept"
+  port_range = "80/80"
+  priority = 1
+  security_group_id = "${alicloud_security_group.transcoding_security_group.id}"
+  cidr_ip = "0.0.0.0/0"
+}
+
 // Powerful ECS instance type
 data "alicloud_instance_types" "transcoding_instance_types" {
   cpu_core_count = 8
@@ -30,7 +56,7 @@ resource "alicloud_instance" "transcoding_ecs" {
 
   vswitch_id = "${alicloud_vswitch.app_vswitch.id}"
   security_groups = [
-    "${alicloud_security_group.app_security_group.id}"
+    "${alicloud_security_group.transcoding_security_group.id}"
   ]
 }
 
