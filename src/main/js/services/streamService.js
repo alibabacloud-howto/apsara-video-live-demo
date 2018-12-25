@@ -30,5 +30,19 @@ export default {
             ];
             resolve(streams);
         });
+    },
+
+    /**
+     * Create a stream with the given name.
+     *
+     * @param {string} streamName
+     * @param {{
+     *     onLocalMediaStreamAvailable: function(localMediaStream: MediaStream),
+     *     onStreamCreated: function(stream: Stream),
+     *     onError(error: string)
+     * }} eventHandler
+     */
+    createByName(streamName, eventHandler) {
+        // TODO
     }
 };
