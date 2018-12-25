@@ -10,10 +10,7 @@ export default class HomePage extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {
-            streams: [],
-            errorMessage: ''
-        };
+        this.state = {streams: []};
     }
 
     componentDidMount() {
@@ -22,7 +19,7 @@ export default class HomePage extends React.Component {
                 this.setState({streams: streams});
             })
             .catch(error => {
-                this.setState({errorMessage: 'Unable to find streams: ' + JSON.stringify(error)});
+                this.props.onError(error);
             });
     }
 
@@ -69,7 +66,6 @@ export default class HomePage extends React.Component {
                         <ul>
                             {streamElems}
                         </ul>
-                        <p className="text-danger">{this.state.errorMessage}</p>
                     </div>
                 </div>
                 <div className="alert alert-warning" role="alert">
