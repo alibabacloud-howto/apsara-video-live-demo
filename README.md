@@ -3,7 +3,8 @@
 ## Summary
 0. [Introduction](#introduction)
 1. [Architecture](#architecture)
-2. [Installation](#installation)
+2. [Apsara Video Live configuration](#apsara-video-live-configuration)
+3. [Installation](#installation)
 
 ## Introduction
 The goal of this demo is to showcase [Apsara Video Live](https://www.alibabacloud.com/product/apsaravideo-for-live),
@@ -116,6 +117,8 @@ We now need to link the "push" and "pull" domains together:
 * In the new page, click on the button with the "pen" icon for "Stream Pushing Information > 
   Ingest Domain Name";
 * In the popup, select your "push" domain (e.g. livevideo-push.my-sample-domain.xyz) and click on "OK".
+
+TODO explain how to test with OBS
 
 ## Installation
 TODO Terraform script

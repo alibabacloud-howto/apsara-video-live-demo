@@ -1,6 +1,7 @@
 package com.alibaba.intl.livevideotranscoder.services;
 
 import com.alibaba.intl.livevideotranscoder.exceptions.TranscodingException;
+import com.alibaba.intl.livevideotranscoder.models.RtpToRtmpTranscodingContext;
 
 import java.util.List;
 
@@ -12,15 +13,12 @@ import java.util.List;
 public interface TranscodingService {
 
     /**
-     * Start transcoding a video stream from RTP to Apsara Video Live.
-     *
-     * @param id  Unique ID for this stream.
-     * @param sdp Descriptor for the source stream in RTP format.
+     * Start transcoding a video stream from RTP to RTMP.
      */
-    void startTranscodingRtpToAvl(String id, String sdp) throws TranscodingException;
+    void startTranscoding(RtpToRtmpTranscodingContext context) throws TranscodingException;
 
     /**
-     * @return IDs of running transcoding processes.
+     * @return Contexts of running transcoding processes.
      */
-    List<String> getRunningTranscodingIds();
+    List<RtpToRtmpTranscodingContext> getRunningTranscodingContexts();
 }

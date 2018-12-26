@@ -1,6 +1,7 @@
 package com.alibaba.intl.livevideotranscoder.controllers;
 
 import com.alibaba.intl.livevideotranscoder.exceptions.TranscodingException;
+import com.alibaba.intl.livevideotranscoder.models.RtpToRtmpTranscodingContext;
 import com.alibaba.intl.livevideotranscoder.services.TranscodingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,18 +26,17 @@ public class TranscodingController {
     }
 
     /**
-     * Start transcoding a video stream from RTP to Apsara Video Live.
+     * Start transcoding a video stream from RTP to RTMP.
      *
-     * @param id  Unique ID for this stream.
-     * @param sdp Descriptor for the source stream in RTP format.
      * @return Success or error message.
      */
-    @RequestMapping(value = "/rtp-to-avl-transcodings/{id}/start", method = RequestMethod.POST)
-    public ResponseEntity<String> startTranscodingRtpToAvl(@PathVariable String id, @RequestBody String sdp) {
-        LOGGER.info("Handle transcoding request (id = {}): {}", id, sdp);
+    @RequestMapping(value = "/transcodings/{id}", method = RequestMethod.PUT)
+    public ResponseEntity<String> startTranscodingRtpToRtmp(@PathVariable String id, @RequestBody RtpToRtmpTranscodingContext context) {
+        context.setId(id);
+        LOGGER.info("Handle transcoding request: {}", context);
 
         try {
-            transcodingService.startTranscodingRtpToAvl(id, sdp);
+            transcodingService.startTranscoding(context);
             return ResponseEntity.ok("Transcoding started.");
         } catch (TranscodingException e) {
             LOGGER.error("Unable to start transcoding.", e);
@@ -44,8 +44,11 @@ public class TranscodingController {
         }
     }
 
-    @RequestMapping("/rtp-to-avl-transcodings")
-    public List<String> getRunningTranscodingIds() {
-        return transcodingService.getRunningTranscodingIds();
+    /**
+     * @return IDs of running transcoding processes.
+     */
+    @RequestMapping("/rtp-to-rtmp-transcodings")
+    public List<RtpToRtmpTranscodingContext> getRunningTranscodingContexts() {
+        return transcodingService.getRunningTranscodingContexts();
     }
 }

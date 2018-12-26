@@ -1,6 +1,7 @@
 package com.alibaba.intl.livevideotranscoder.services.impl;
 
 import com.alibaba.intl.livevideotranscoder.exceptions.TranscodingException;
+import com.alibaba.intl.livevideotranscoder.models.RtpToRtmpTranscodingContext;
 import com.alibaba.intl.livevideotranscoder.services.TranscodingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,8 +10,9 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -24,70 +26,46 @@ public class TranscodingServiceImpl implements TranscodingService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TranscodingServiceImpl.class);
     private final TaskExecutor taskExecutor;
-    private final Set<String> transcodingIds = ConcurrentHashMap.newKeySet();
+    private final Map<String, RtpToRtmpTranscodingContext> transcodingContextById = new ConcurrentHashMap<>();
     private final String ffmpegSdpFileFolderPath;
-    private final boolean apsaraVideoUseEdgeStreaming;
-    private final String apsaraVideoEdgeStreamingPushDomainName;
-    private final String apsaraVideoCentralServerDomainName;
-    private final String apsaraVideoCentralStreamingDomainName;
-    private final String apsaraVideoAppName;
-    private final String ffmpegPath;
+    private final String ffmpegExecutablePath;
 
     public TranscodingServiceImpl(
             TaskExecutor ffmpegLauncherThreadPoolTaskExecutor,
             @Value("${transcoding.ffmpegSdpFileFolderPath}") String ffmpegSdpFileFolderPath,
-            @Value("${transcoding.apsaraVideoUseEdgeStreaming}") boolean apsaraVideoUseEdgeStreaming,
-            @Value("${transcoding.apsaraVideoEdgeStreamingPushDomainName}") String apsaraVideoEdgeStreamingPushDomainName,
-            @Value("${transcoding.apsaraVideoCentralServerDomainName}") String apsaraVideoCentralServerDomainName,
-            @Value("${transcoding.apsaraVideoCentralStreamingDomainName}") String apsaraVideoCentralStreamingDomainName,
-            @Value("${transcoding.apsaraVideoAppName}") String apsaraVideoAppName,
-            @Value("${transcoding.ffmpegPath}") String ffmpegPath) {
+            @Value("${transcoding.ffmpegExecutablePath}") String ffmpegExecutablePath) {
         this.taskExecutor = ffmpegLauncherThreadPoolTaskExecutor;
         this.ffmpegSdpFileFolderPath = ffmpegSdpFileFolderPath;
-        this.apsaraVideoUseEdgeStreaming = apsaraVideoUseEdgeStreaming;
-        this.apsaraVideoEdgeStreamingPushDomainName = apsaraVideoEdgeStreamingPushDomainName;
-        this.apsaraVideoCentralServerDomainName = apsaraVideoCentralServerDomainName;
-        this.apsaraVideoCentralStreamingDomainName = apsaraVideoCentralStreamingDomainName;
-        this.apsaraVideoAppName = apsaraVideoAppName;
-        this.ffmpegPath = ffmpegPath;
+        this.ffmpegExecutablePath = ffmpegExecutablePath;
     }
 
     @Override
-    public void startTranscodingRtpToAvl(String id, String sdp) throws TranscodingException {
+    public void startTranscoding(RtpToRtmpTranscodingContext context) throws TranscodingException {
         // Save the SDP into a file
-        String sdpFilePath = ffmpegSdpFileFolderPath + "/" + id + ".sdp";
+        String sdpFilePath = ffmpegSdpFileFolderPath + "/" + context.getId() + ".sdp";
         LOGGER.info("Copy the SDP data into the file: {}", sdpFilePath);
         try (FileOutputStream outputStream = new FileOutputStream(sdpFilePath)) {
-            outputStream.write(sdp.getBytes());
+            outputStream.write(context.getSdp().getBytes());
         } catch (IOException e) {
             throw new TranscodingException("Unable to create the file " + sdpFilePath + ".", e);
         }
 
-        // Prepare the destination URL
-        String rtmpUrl;
-        if (apsaraVideoUseEdgeStreaming) {
-            rtmpUrl = "rtmp://" + apsaraVideoEdgeStreamingPushDomainName + "/" + apsaraVideoAppName + "/" + id;
-        } else {
-            rtmpUrl = "rtmp://" + apsaraVideoCentralServerDomainName + "/" + apsaraVideoAppName + "/" + id +
-                    "?vhost=" + apsaraVideoCentralStreamingDomainName;
-        }
-        LOGGER.info("Send the video stream to: {}", rtmpUrl);
-
         // Start FFMPEG
         taskExecutor.execute(() -> {
-            LOGGER.info("Execute FFMPEG (id = {}).", id);
-            transcodingIds.add(id);
+            LOGGER.info("Execute FFMPEG (id = {}).", context.getId());
+            transcodingContextById.put(context.getId(), context);
 
             try {
                 Process process = new ProcessBuilder(
-                        ffmpegPath,
+                        ffmpegExecutablePath,
                         "-protocol_whitelist \"file,udp,rtp\"",
                         "-i " + sdpFilePath,
                         "-vcodec libx264",
                         "-preset veryfast",
                         "-profile:v baseline -level 3.0",
                         "-max_muxing_queue_size 2048",
-                        "-f flv").start();
+                        "-f flv",
+                        context.getRtmpUrl()).start();
 
                 try (InputStream inputStream = process.getInputStream();
                      InputStream errorStream = process.getErrorStream();
@@ -112,15 +90,16 @@ public class TranscodingServiceImpl implements TranscodingService {
                 LOGGER.error("An error occurred when executing FFMPEG.", t);
             }
 
-            transcodingIds.remove(id);
-            LOGGER.info("FFMPEG process terminated (id = {}).", id);
+            transcodingContextById.remove(context.getId());
+            LOGGER.info("FFMPEG process terminated (id = {}).", context.getId());
         });
     }
 
     @Override
-    public List<String> getRunningTranscodingIds() {
-        return transcodingIds.stream()
-                .sorted()
+    public List<RtpToRtmpTranscodingContext> getRunningTranscodingContexts() {
+        return transcodingContextById.entrySet().stream()
+                .sorted(Comparator.comparing(Map.Entry::getKey))
+                .map(Map.Entry::getValue)
                 .collect(Collectors.toList());
     }
 }
