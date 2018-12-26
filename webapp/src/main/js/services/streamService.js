@@ -1,4 +1,5 @@
-import Stream from '../model/Stream';
+import Stream from '../models/Stream';
+import webrtcService from './webrtcService';
 
 /**
  * Allow users to handle streams.
@@ -43,6 +44,32 @@ export default {
      * }} eventHandler
      */
     createByName(streamName, eventHandler) {
-        // TODO
+        const stream = new Stream({
+            id: this._generateUuid(),
+            name: streamName
+        });
+
+        webrtcService.getConfiguration()
+            .then(configuration => {
+                // TODO
+                console.log(configuration);
+            })
+            .catch(error => {
+                eventHandler.onError('Unable to get the WebRTC configuration: ' + error);
+            });
+    },
+
+    /**
+     * Generate a random-based UUID v4.
+     * Thanks to https://stackoverflow.com/a/2117523
+     *
+     * @private
+     * @returns {string}
+     */
+    _generateUuid() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+            let r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
     }
 };

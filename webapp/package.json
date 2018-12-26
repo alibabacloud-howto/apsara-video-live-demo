@@ -4,7 +4,12 @@
   "description": "Apsara Video Live Demo",
   "author": "Alibaba Cloud",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git@gitlab.alibaba-inc.com:delivery/apsara-video-live-demo.git"
+  },
   "dependencies": {
+    "@techteamer/janus-api": "^4.0.0",
     "bootstrap": "^4.2.1",
     "jquery": "^3.3.1",
     "popper.js": "^1.14.6",
