@@ -10,13 +10,13 @@ export default class HomePage extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {streams: []};
+        this.state = {streamNames: []};
     }
 
     componentDidMount() {
-        streamService.findAll()
-            .then(streams => {
-                this.setState({streams: streams});
+        streamService.findAllStreamNames()
+            .then(streamNames => {
+                this.setState({streamNames: streamNames});
             })
             .catch(error => {
                 this.props.onError(error);
@@ -25,10 +25,10 @@ export default class HomePage extends React.Component {
 
     render() {
         let streamElems = [];
-        if (this.state.streams.length > 0) {
-            streamElems = this.state.streams.map(stream =>
-                <li key={stream.id}>
-                    <a href="#" onClick={() => this.props.onStreamSelected(stream)}>{stream.name}</a>
+        if (this.state.streamNames.length > 0) {
+            streamElems = this.state.streamNames.map(streamName =>
+                <li key={streamName}>
+                    <a href="#" onClick={() => this.props.onStreamSelected(streamName)}>{streamName}</a>
                 </li>
             );
         } else {

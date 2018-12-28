@@ -1,5 +1,6 @@
-import Stream from '../models/Stream';
-import webrtcService from './webrtcService';
+import configurationService from './configurationService';
+import JanusClient from '../clients/JanusClient';
+import RtpForwardingDestination from '../models/RtpForwardingDestination';
 
 /**
  * Allow users to handle streams.
@@ -8,55 +9,108 @@ import webrtcService from './webrtcService';
  */
 export default {
     /**
-     * Find all existing streams.
+     * Find all the stream names managed by Apsara Video Live.
      *
-     * @return {Promise.<Array.<Stream>>}
+     * @return {Promise.<Array.<string>>}
      */
-    findAll() {
+    findAllStreamNames() {
         return new Promise((resolve, reject) => {
-            // TODO
-            const streams = [
-                new Stream({
-                    id: 'id0',
-                    name: 'Stream 0',
-                    domainName: 'domain.com',
-                    appName: 'app name 0'
-                }),
-                new Stream({
-                    id: 'id1',
-                    name: 'Stream 1',
-                    domainName: 'domain.com',
-                    appName: 'app name 1'
-                })
-            ];
-            resolve(streams);
+            fetch('/streams')
+                .then(result => result.json())
+                .then(
+                    result => resolve(result),
+                    error => reject('Unable to find all the streams: ' + JSON.stringify(error))
+                );
         });
     },
 
     /**
      * Create a stream with the given name.
      *
-     * @param {string} streamName
-     * @param {{
-     *     onLocalMediaStreamAvailable: function(localMediaStream: MediaStream),
-     *     onStreamCreated: function(stream: Stream),
-     *     onError(error: string)
-     * }} eventHandler
+     * @param {string} name
+     *     String name.
+     * @param {function(localMediaStream: MediaStream)} onLocalMediaStreamAvailable
+     *     Function called when the {@link MediaStream} is available for the VIDEO element.
+     * @param {function(error: string)} onError
+     *     Function called when an error has occurred.
      */
-    createByName(streamName, eventHandler) {
-        const stream = new Stream({
-            id: this._generateUuid(),
-            name: streamName
-        });
+    create(name, onLocalMediaStreamAvailable, onError) {
+        const uniqueName = name + '_' + this._generateUuid();
 
-        webrtcService.getConfiguration()
-            .then(configuration => {
-                // TODO
-                console.log(configuration);
-            })
-            .catch(error => {
-                eventHandler.onError('Unable to get the WebRTC configuration: ' + error);
+        // Load the WebRTC configuration
+        configurationService.getConfiguration()
+            .catch(error => onError('Unable to get the WebRTC configuration: ' + error))
+            .then(config => {
+
+                // Open a connection to Janus
+                const janusClient = new JanusClient(uniqueName, config);
+                janusClient.connect({
+                    onError: onError,
+                    onLocalMediaStreamAvailable: onLocalMediaStreamAvailable,
+                    onConnectionEstablished: sdp => {
+
+                        // Forward the video data from Janus to Apsara Video Live
+                        this.getRtpForwardingDestination(uniqueName)
+                            .catch(error => onError('Unable to get the destination to forward the video data: ' + error))
+                            .then(dest => {
+                                janusClient.forwardRtpStream(dest.hostname, dest.audioPort, dest.videoPort).then(() => {
+                                    this.transcodeStream(uniqueName, sdp, dest)
+                                        .catch(error => onError('Unable to transcode the stream: ' + error))
+                                        .then(() => {
+                                            console.log('Stream transcoding');
+                                        });
+                                })
+                            });
+                    }
+                });
             });
+    },
+
+    /**
+     * Provide the destination where Janus can forward the RTP data.
+     *
+     * @param {string} name
+     *     Stream name.
+     * @return {Promise.<RtpForwardingDestination>}
+     *     Destination information.
+     */
+    getRtpForwardingDestination(name) {
+        return new Promise((resolve, reject) => {
+            fetch(`/streams/${name}/forwarding-destination`)
+                .then(result => result.json())
+                .then(
+                    result => resolve(new RtpForwardingDestination(result)),
+                    error => reject('Unable to find all the streams: ' + JSON.stringify(error))
+                );
+        });
+    },
+
+    /**
+     * Start transcoding the RTP data from Janus to Apsara Video Live via RTMP.
+     *
+     * @param {string} name
+     *     Stream name.
+     * @param {string} webrtcSdp
+     *     SDP file that describes the RTP stream between the web browser and Janus.
+     * @param {RtpForwardingDestination} forwardingDestination
+     *     Destination where Janus send its RTP data.
+     * @return {Promise.<string>}
+     *     Success or error message.
+     */
+    transcodeStream(name, webrtcSdp, forwardingDestination) {
+        return new Promise((resolve, reject) => {
+            let formData = new FormData();
+            formData.append('webrtcSdp', new Blob([webrtcSdp], {type: 'text/plain'}));
+            formData.append('forwardingDestination',
+                new Blob([JSON.stringify(forwardingDestination)], {type: 'application/json'}));
+
+            fetch(`/streams/${name}/transcode`, {method: 'POST', body: formData})
+                .then(result => result.text())
+                .then(
+                    result => resolve(result),
+                    error => reject(error)
+                );
+        });
     },
 
     /**

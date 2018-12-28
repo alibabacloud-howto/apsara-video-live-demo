@@ -33,7 +33,7 @@ class App extends React.Component {
                 pageElem = <HomePage
                     onError={message => this.showErrorMessage(message)}
                     onBroadcast={() => this.setCurrentPage('broadcast')}
-                    onStreamSelected={stream => console.log('TODO watch stream: ' + JSON.stringify(stream))}/>;
+                    onStreamSelected={streamName => console.log('TODO watch stream: ' + streamName)}/>;
                 break;
         }
 

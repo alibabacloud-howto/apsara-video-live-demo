@@ -9,8 +9,9 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>commons</module>
         <module>webapp</module>
-        <module>transcoding-server</module>
+        <module>transcoder</module>
     </modules>
 
 </project>

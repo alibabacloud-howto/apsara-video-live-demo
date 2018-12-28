@@ -11,7 +11,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.1.1.RELEASE</version>
-		<relativePath/>
+        <relativePath/>
     </parent>
 
     <packaging>jar</packaging>
@@ -22,12 +22,33 @@
         <frontend-maven-plugin.version>1.6</frontend-maven-plugin.version>
         <frontend-maven-plugin.node.version>v10.11.0</frontend-maven-plugin.node.version>
         <frontend-maven-plugin.npm.version>6.4.1</frontend-maven-plugin.npm.version>
+
+        <aliyun-java-sdk-core.version>4.1.1</aliyun-java-sdk-core.version>
+        <aliyun-java-sdk-live.version>3.7.3</aliyun-java-sdk-live.version>
     </properties>
 
     <dependencies>
         <dependency>
+            <groupId>com.alibaba.intl</groupId>
+            <artifactId>apsara-video-live-demo-commons</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>aliyun-java-sdk-core</artifactId>
+            <version>${aliyun-java-sdk-core.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>aliyun-java-sdk-live</artifactId>
+            <version>${aliyun-java-sdk-live.version}</version>
         </dependency>
     </dependencies>
 
@@ -39,6 +60,8 @@
                 <version>${maven-compiler-plugin.version}</version>
                 <configuration>
                     <release>11</release>
+                    <source>11</source>
+                    <target>11</target>
                 </configuration>
             </plugin>
 

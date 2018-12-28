@@ -92,17 +92,12 @@ export default class BroadcastPage extends React.Component {
         }
         this.setState({streamNameReady: true});
 
-        streamService.createByName(streamName, {
-            onLocalMediaStreamAvailable(localMediaStream) {
+        streamService.create(
+            streamName,
+            localMediaStream => {
                 this.videoRef.current.style.display = 'block';
                 this.videoRef.current.srcObject = localMediaStream;
             },
-            onStreamCreated(stream) {
-                // Nothing to do
-            },
-            onError(error) {
-                this.props.onError(error);
-            }
-        });
+            error => this.props.onError(error));
     }
 }
