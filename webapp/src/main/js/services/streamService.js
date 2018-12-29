@@ -114,6 +114,14 @@ export default {
     },
 
     /**
+     * @param {string} streamName
+     * @return {string} Stream name without the trailing UUID.
+     */
+    simplifyStreamName(streamName) {
+        return streamName.substring(0, streamName.indexOf('_'));
+    },
+
+    /**
      * Generate a random-based UUID v4.
      * Thanks to https://stackoverflow.com/a/2117523
      *

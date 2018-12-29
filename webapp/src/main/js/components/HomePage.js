@@ -2,7 +2,7 @@ import React from 'react';
 import streamService from '../services/streamService';
 
 /**
- * Home page.
+ * Let the user to broadcast his video stream or watch other people's streams.
  *
  * @author Alibaba Cloud
  */
@@ -28,7 +28,9 @@ export default class HomePage extends React.Component {
         if (this.state.streamNames.length > 0) {
             streamElems = this.state.streamNames.map(streamName =>
                 <li key={streamName}>
-                    <a href="#" onClick={() => this.props.onStreamSelected(streamName)}>{streamName}</a>
+                    <a href="#" onClick={() => this.props.onStreamSelected(streamName)}>
+                        {streamService.simplifyStreamName(streamName)}
+                    </a>
                 </li>
             );
         } else {

@@ -5,6 +5,7 @@ import Navbar from './components/Navbar';
 import ErrorPanel from './components/ErrorPanel';
 import HomePage from './components/HomePage';
 import BroadcastPage from './components/BroadcastPage';
+import WatchPage from './components/WatchPage';
 
 import '../resources/static/scss/app.scss';
 
@@ -18,7 +19,8 @@ class App extends React.Component {
         super(props);
         this.state = {
             errorMessage: '',
-            currentPage: 'home'
+            currentPage: 'home',
+            selectedStreamName: ''
         };
     }
 
@@ -28,12 +30,16 @@ class App extends React.Component {
             case 'broadcast':
                 pageElem = <BroadcastPage onError={message => this.showErrorMessage(message)}/>;
                 break;
+            case 'watch':
+                pageElem = <WatchPage onError={message => this.showErrorMessage(message)}
+                                      streamName={this.state.selectedStreamName}/>;
+                break;
             case 'home':
             default:
                 pageElem = <HomePage
                     onError={message => this.showErrorMessage(message)}
                     onBroadcast={() => this.setCurrentPage('broadcast')}
-                    onStreamSelected={streamName => console.log('TODO watch stream: ' + streamName)}/>;
+                    onStreamSelected={streamName => this._onStreamSelected(streamName)}/>;
                 break;
         }
 
@@ -62,6 +68,15 @@ class App extends React.Component {
      */
     setCurrentPage(currentPage) {
         this.setState({currentPage: currentPage});
+    }
+
+    /**
+     * @param {string} streamName
+     * @private
+     */
+    _onStreamSelected(streamName) {
+        this.setState({selectedStreamName: streamName});
+        this.setCurrentPage('watch');
     }
 }
 

@@ -2,7 +2,7 @@ import React from "react";
 import streamService from "../services/streamService";
 
 /**
- * Broadcast page.
+ * Allow the user to broadcast video from his webcam.
  *
  * @author Alibaba Cloud
  */
@@ -55,7 +55,7 @@ export default class BroadcastPage extends React.Component {
                         <div className="alert alert-warning mt-3" role="alert">
                             Note: if it doesn't work, please try to open this page in
                             <a href="https://www.mozilla.org/en-US/firefox/"> Firefox </a> or
-                            <a href="https://www.google.com/chrome/"> Chrome </a>.
+                            <a href="https://www.google.com/chrome/"> Chrome</a>.
                         </div>
                     </div>
                 </div>
