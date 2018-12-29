@@ -30,4 +30,9 @@ public interface StreamService {
      */
     void transcodeStream(String streamName, String webrtcSdp, RtpForwardingDestination forwardingDestination)
             throws TranscodeStreamException;
+
+    /**
+     * @return URL where users can play the stream.
+     */
+    String getStreamPullUrl(String streamName);
 }

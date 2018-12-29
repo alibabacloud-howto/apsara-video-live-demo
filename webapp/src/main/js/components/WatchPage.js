@@ -10,7 +10,6 @@ export default class WatchPage extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {};
     }
 
     render() {
@@ -21,7 +20,7 @@ export default class WatchPage extends React.Component {
                         <h2 className="mt-3">
                             Watching the stream: {streamService.simplifyStreamName(this.props.streamName)}
                         </h2>
-                        <p id="loadingMessage">
+                        <p style={{display: this.props.streamPullUrl ? 'none' : 'block'}}>
                             Loading...
                         </p>
                     </div>

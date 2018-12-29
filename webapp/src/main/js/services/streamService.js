@@ -114,11 +114,32 @@ export default {
     },
 
     /**
-     * @param {string} streamName
-     * @return {string} Stream name without the trailing UUID.
+     * @param {string} name
+     *     Stream name.
+     * @return {string}
+     *     Stream name without the trailing UUID.
      */
-    simplifyStreamName(streamName) {
-        return streamName.substring(0, streamName.indexOf('_'));
+    simplifyStreamName(name) {
+        return name.substring(0, name.indexOf('_'));
+    },
+
+    /**
+     * Get the URL where users can play the stream.
+     *
+     * @param {string} name
+     *     Stream name.
+     * @return {Promise.<string>}
+     *     URL where users can play the stream.
+     */
+    getStreamPullUrl(name) {
+        return new Promise((resolve, reject) => {
+            fetch(`/streams/${name}/pull-url`)
+                .then(result => result.text())
+                .then(
+                    result => resolve(result),
+                    error => reject('Unable to get the stream pull URL: ' + JSON.stringify(error))
+                );
+        });
     },
 
     /**

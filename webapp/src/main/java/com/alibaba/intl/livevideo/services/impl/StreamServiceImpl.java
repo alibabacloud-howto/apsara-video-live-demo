@@ -129,10 +129,7 @@ public class StreamServiceImpl implements StreamService {
 
         // Build the RTMP URL
         String urlPath = "/" + avlAppName + "/" + streamName;
-        long validtyTimestamp = System.currentTimeMillis() / 1000 + avlPushAuthValidityPeriod;
-        String authKeyHashSource = urlPath + "-" + validtyTimestamp + "-0-0-" + avlPushAuthPrimaryKey;
-        String authKeyHash = DatatypeConverter.printHexBinary(getMd5Digest(authKeyHashSource)).toLowerCase();
-        String authKey = validtyTimestamp + "-0-0-" + authKeyHash;
+        String authKey = generateAuthKey(urlPath);
         String rtmpUrl = "rtmp://" + avlPushDomainName + urlPath + "?auth_key=" + authKey;
 
         // Send the request to the transcoder server
@@ -144,6 +141,26 @@ public class StreamServiceImpl implements StreamService {
         if (responseEntity.getStatusCode() != HttpStatus.OK) {
             throw new TranscodeStreamException(responseEntity.getBody());
         }
+    }
+
+    @Override
+    public String getStreamPullUrl(String streamName) {
+        String urlPath = "/" + avlAppName + "/" + streamName + ".m3u8";
+        String authKey = generateAuthKey(urlPath);
+        return "http://" + avlPullDomainName + urlPath + "?auth_key=" + authKey;
+    }
+
+    /**
+     * Generate an "auth_key" according to this document: https://www.alibabacloud.com/help/doc-detail/85018.htm
+     *
+     * @param urlPath Part of the URL after the domain name (e.g. "/appName/streamName").
+     * @return Generated "auth_key".
+     */
+    private String generateAuthKey(String urlPath) {
+        long validtyTimestamp = System.currentTimeMillis() / 1000 + avlPushAuthValidityPeriod;
+        String authKeyHashSource = urlPath + "-" + validtyTimestamp + "-0-0-" + avlPushAuthPrimaryKey;
+        String authKeyHash = DatatypeConverter.printHexBinary(getMd5Digest(authKeyHashSource)).toLowerCase();
+        return validtyTimestamp + "-0-0-" + authKeyHash;
     }
 
     private byte[] getMd5Digest(String value) {

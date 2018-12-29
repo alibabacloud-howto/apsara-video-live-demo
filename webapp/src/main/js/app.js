@@ -6,6 +6,7 @@ import ErrorPanel from './components/ErrorPanel';
 import HomePage from './components/HomePage';
 import BroadcastPage from './components/BroadcastPage';
 import WatchPage from './components/WatchPage';
+import streamService from './services/streamService';
 
 import '../resources/static/scss/app.scss';
 
@@ -77,6 +78,12 @@ class App extends React.Component {
     _onStreamSelected(streamName) {
         this.setState({selectedStreamName: streamName});
         this.setCurrentPage('watch');
+        streamService.getStreamPullUrl(streamName)
+            .catch(error => this.showErrorMessage(error))
+            .then(url => {
+                // TODO
+                console.log(url);
+            });
     }
 }
 

@@ -64,4 +64,13 @@ public class StreamController {
         }
         return ResponseEntity.ok("Success");
     }
+
+    /**
+     * @param name Stream name.
+     * @return URL where users can play the stream.
+     */
+    @RequestMapping("/streams/{name}/pull-url")
+    public String getStreamPullUrl(@PathVariable String name) {
+        return streamService.getStreamPullUrl(name);
+    }
 }
