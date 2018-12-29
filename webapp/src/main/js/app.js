@@ -86,8 +86,6 @@ class App extends React.Component {
         streamService.getStreamPullUrl(streamName)
             .catch(error => this.showErrorMessage(error))
             .then(url => {
-                // TODO
-                console.log(url);
                 this._watchPage.showStream(url);
             });
     }

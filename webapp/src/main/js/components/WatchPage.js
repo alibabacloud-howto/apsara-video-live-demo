@@ -11,6 +11,10 @@ export default class WatchPage extends React.Component {
 
     constructor(props) {
         super(props);
+        this.state = {
+            isLoading: true
+        };
+        this.videoRef = React.createRef();
     }
 
     render() {
@@ -21,14 +25,14 @@ export default class WatchPage extends React.Component {
                         <h2 className="mt-3">
                             Watching the stream: {streamService.simplifyStreamName(this.props.streamName)}
                         </h2>
-                        <p style={{display: this.props.streamPullUrl ? 'none' : 'block'}}>
+                        <p style={{display: this.props.isLoading ? 'block' : 'none'}}>
                             Loading...
                         </p>
                     </div>
                 </div>
                 <div className="row justify-content-md-center">
                     <div className="col-md-12">
-                        <video id="liveVideo" className="m-auto" controls/>
+                        <video id="liveVideo" className="m-auto" controls ref={this.videoRef}/>
                     </div>
                 </div>
                 <div className="row">
@@ -50,14 +54,13 @@ export default class WatchPage extends React.Component {
             return;
         }
 
-        // TODO
-        const videoElement = document.getElementById('liveVideo');
-        videoElement.style.display = 'block';
+        this.setState({isLoading: false});
+        this.videoRef.current.style.display = 'block';
         const flvPlayer = flvjs.createPlayer({
             type: 'flv',
             url: streamPullUrl
         });
-        flvPlayer.attachMediaElement(videoElement);
+        flvPlayer.attachMediaElement(this.videoRef.current);
         flvPlayer.load();
         flvPlayer.play();
     }
