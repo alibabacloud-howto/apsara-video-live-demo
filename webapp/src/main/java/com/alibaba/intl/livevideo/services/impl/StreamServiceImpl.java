@@ -42,6 +42,8 @@ public class StreamServiceImpl implements StreamService {
     private final String avlAppName;
     private final String avlPushAuthPrimaryKey;
     private final long avlPushAuthValidityPeriod;
+    private final String avlPullAuthPrimaryKey;
+    private final long avlPullAuthValidityPeriod;
 
     private final String transcoderHostname;
     private final int transcoderHttpPort;
@@ -59,6 +61,8 @@ public class StreamServiceImpl implements StreamService {
             @Value("${apsaraVideoLive.appName}") String avlAppName,
             @Value("${apsaraVideoLive.pushAuthPrimaryKey}") String avlPushAuthPrimaryKey,
             @Value("${apsaraVideoLive.pushAuthValidityPeriod}") long avlPushAuthValidityPeriod,
+            @Value("${apsaraVideoLive.pullAuthPrimaryKey}") String avlPullAuthPrimaryKey,
+            @Value("${apsaraVideoLive.pullAuthValidityPeriod}") long avlPullAuthValidityPeriod,
             @Value("${transcoder.hostname}") String transcoderHostname,
             @Value("${transcoder.httpPort}") int transcoderHttpPort,
             @Value("${transcoder.rtpAudioPortRangeStart}") int transcoderRtpAudioPortRangeStart,
@@ -73,6 +77,8 @@ public class StreamServiceImpl implements StreamService {
         this.avlAppName = avlAppName;
         this.avlPushAuthPrimaryKey = avlPushAuthPrimaryKey;
         this.avlPushAuthValidityPeriod = avlPushAuthValidityPeriod;
+        this.avlPullAuthPrimaryKey = avlPullAuthPrimaryKey;
+        this.avlPullAuthValidityPeriod = avlPullAuthValidityPeriod;
 
         this.transcoderHostname = transcoderHostname;
         this.transcoderHttpPort = transcoderHttpPort;
@@ -129,7 +135,7 @@ public class StreamServiceImpl implements StreamService {
 
         // Build the RTMP URL
         String urlPath = "/" + avlAppName + "/" + streamName;
-        String authKey = generateAuthKey(urlPath);
+        String authKey = generateAuthKey(urlPath, avlPushAuthPrimaryKey, avlPushAuthValidityPeriod);
         String rtmpUrl = "rtmp://" + avlPushDomainName + urlPath + "?auth_key=" + authKey;
 
         // Send the request to the transcoder server
@@ -145,20 +151,22 @@ public class StreamServiceImpl implements StreamService {
 
     @Override
     public String getStreamPullUrl(String streamName) {
-        String urlPath = "/" + avlAppName + "/" + streamName + ".m3u8";
-        String authKey = generateAuthKey(urlPath);
+        String urlPath = "/" + avlAppName + "/" + streamName + ".flv";
+        String authKey = generateAuthKey(urlPath, avlPullAuthPrimaryKey, avlPullAuthValidityPeriod);
         return "http://" + avlPullDomainName + urlPath + "?auth_key=" + authKey;
     }
 
     /**
      * Generate an "auth_key" according to this document: https://www.alibabacloud.com/help/doc-detail/85018.htm
      *
-     * @param urlPath Part of the URL after the domain name (e.g. "/appName/streamName").
+     * @param urlPath        Part of the URL after the domain name (e.g. "/appName/streamName").
+     * @param primaryKey     URL authentication primary key (found in the access control menu in the Apsara Video Live console).
+     * @param validityPeriod URL validity in seconds (found in the access control menu in the Apsara Video Live console).
      * @return Generated "auth_key".
      */
-    private String generateAuthKey(String urlPath) {
-        long validtyTimestamp = System.currentTimeMillis() / 1000 + avlPushAuthValidityPeriod;
-        String authKeyHashSource = urlPath + "-" + validtyTimestamp + "-0-0-" + avlPushAuthPrimaryKey;
+    private String generateAuthKey(String urlPath, String primaryKey, long validityPeriod) {
+        long validtyTimestamp = System.currentTimeMillis() / 1000 + validityPeriod;
+        String authKeyHashSource = urlPath + "-" + validtyTimestamp + "-0-0-" + primaryKey;
         String authKeyHash = DatatypeConverter.printHexBinary(getMd5Digest(authKeyHashSource)).toLowerCase();
         return validtyTimestamp + "-0-0-" + authKeyHash;
     }

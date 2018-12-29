@@ -1,4 +1,5 @@
-import React from "react";
+import React from 'react';
+import flvjs from 'flv.js';
 import streamService from '../services/streamService';
 
 /**
@@ -41,5 +42,23 @@ export default class WatchPage extends React.Component {
                 </div>
             </div>
         );
+    }
+
+    showStream(streamPullUrl) {
+        if (!flvjs.isSupported()) {
+            this.props.onError('FLV.js is not supported on the browser.');
+            return;
+        }
+
+        // TODO
+        const videoElement = document.getElementById('liveVideo');
+        videoElement.style.display = 'block';
+        const flvPlayer = flvjs.createPlayer({
+            type: 'flv',
+            url: streamPullUrl
+        });
+        flvPlayer.attachMediaElement(videoElement);
+        flvPlayer.load();
+        flvPlayer.play();
     }
 }

@@ -23,6 +23,10 @@ class App extends React.Component {
             currentPage: 'home',
             selectedStreamName: ''
         };
+        this._watchPage = {
+            showStream(url) {
+            }
+        };
     }
 
     render() {
@@ -33,7 +37,8 @@ class App extends React.Component {
                 break;
             case 'watch':
                 pageElem = <WatchPage onError={message => this.showErrorMessage(message)}
-                                      streamName={this.state.selectedStreamName}/>;
+                                      streamName={this.state.selectedStreamName}
+                                      ref={watchPage => this._watchPage = watchPage}/>;
                 break;
             case 'home':
             default:
@@ -83,6 +88,7 @@ class App extends React.Component {
             .then(url => {
                 // TODO
                 console.log(url);
+                this._watchPage.showStream(url);
             });
     }
 }
