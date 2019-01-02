@@ -1,9 +1,10 @@
 package com.alibaba.intl.livevideo.services.impl;
 
-import com.alibaba.intl.livevideo.TranscodeStreamException;
-import com.alibaba.intl.livevideo.models.RtpForwardingDestination;
+import com.alibaba.intl.livevideo.exceptions.RtpForwardingDestinationException;
+import com.alibaba.intl.livevideo.exceptions.TranscodeStreamException;
 import com.alibaba.intl.livevideo.models.Sdp;
 import com.alibaba.intl.livevideo.services.StreamService;
+import com.alibaba.intl.livevideocommons.models.RtpForwardingDestination;
 import com.alibaba.intl.livevideocommons.models.RtpToRtmpTranscodingContext;
 import com.aliyuncs.DefaultAcsClient;
 import com.aliyuncs.exceptions.ClientException;
@@ -18,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import javax.xml.bind.DatatypeConverter;
-import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
@@ -47,10 +47,6 @@ public class StreamServiceImpl implements StreamService {
 
     private final String transcoderHostname;
     private final int transcoderHttpPort;
-    private final int transcoderRtpAudioPortRangeStart;
-    private final int transcoderRtpAudioPortRangeEnd;
-    private final int transcoderRtpVideoPortRangeStart;
-    private final int transcoderRtpVideoPortRangeEnd;
 
     public StreamServiceImpl(
             @Value("${apsaraVideoLive.accessKeyId}") String avlAccessKeyId,
@@ -64,11 +60,7 @@ public class StreamServiceImpl implements StreamService {
             @Value("${apsaraVideoLive.pullAuthPrimaryKey}") String avlPullAuthPrimaryKey,
             @Value("${apsaraVideoLive.pullAuthValidityPeriod}") long avlPullAuthValidityPeriod,
             @Value("${transcoder.hostname}") String transcoderHostname,
-            @Value("${transcoder.httpPort}") int transcoderHttpPort,
-            @Value("${transcoder.rtpAudioPortRangeStart}") int transcoderRtpAudioPortRangeStart,
-            @Value("${transcoder.rtpAudioPortRangeEnd}") int transcoderRtpAudioPortRangeEnd,
-            @Value("${transcoder.rtpVideoPortRangeStart}") int transcoderRtpVideoPortRangeStart,
-            @Value("${transcoder.rtpVideoPortRangeEnd}") int transcoderRtpVideoPortRangeEnd) {
+            @Value("${transcoder.httpPort}") int transcoderHttpPort) {
         this.avlAccessKeyId = avlAccessKeyId;
         this.avlAccessKeySecret = avlAccessKeySecret;
         this.avlRegionId = avlRegionId;
@@ -82,10 +74,6 @@ public class StreamServiceImpl implements StreamService {
 
         this.transcoderHostname = transcoderHostname;
         this.transcoderHttpPort = transcoderHttpPort;
-        this.transcoderRtpAudioPortRangeStart = transcoderRtpAudioPortRangeStart;
-        this.transcoderRtpAudioPortRangeEnd = transcoderRtpAudioPortRangeEnd;
-        this.transcoderRtpVideoPortRangeStart = transcoderRtpVideoPortRangeStart;
-        this.transcoderRtpVideoPortRangeEnd = transcoderRtpVideoPortRangeEnd;
     }
 
     @Override
@@ -107,26 +95,24 @@ public class StreamServiceImpl implements StreamService {
     }
 
     @Override
-    public RtpForwardingDestination getRtpForwardingDestination(String streamName) {
-        // Generate an audio port and video port based on the stream name
-        var digestBytes = getMd5Digest(streamName);
-        var digest = new BigInteger(digestBytes);
+    public RtpForwardingDestination getRtpForwardingDestination(String streamName) throws RtpForwardingDestinationException {
+        String transcoderUrl = "http://" + transcoderHostname + ":" + transcoderHttpPort + "/transcodings/" +
+                streamName + "/new-rtp-forwarding-destination";
+        var restTemplate = new RestTemplate();
+        var responseEntity = restTemplate.getForEntity(transcoderUrl, RtpForwardingDestination.class);
 
-        // Derivate the audio port
-        int audioPortRange = transcoderRtpAudioPortRangeEnd - transcoderRtpAudioPortRangeStart;
-        int audioPort = transcoderRtpAudioPortRangeStart + digest.mod(BigInteger.valueOf(audioPortRange)).intValue();
+        if (responseEntity.getStatusCode() != HttpStatus.OK) {
+            throw new RtpForwardingDestinationException(
+                    "Unable to find a forwarding destination for the stream " + streamName + ".");
+        }
 
-        // Derivate the video port
-        int videoPortRange = transcoderRtpVideoPortRangeEnd - transcoderRtpVideoPortRangeStart;
-        int videoPort = transcoderRtpVideoPortRangeStart + digest.mod(BigInteger.valueOf(videoPortRange)).intValue();
-
-        var destination = new RtpForwardingDestination(transcoderHostname, audioPort, videoPort);
+        RtpForwardingDestination destination = responseEntity.getBody();
         LOGGER.info("Provide the following forwarding destination (stream name = {}): {}", streamName, destination);
         return destination;
     }
 
     @Override
-    public void transcodeStream(String streamName, String webrtcSdp, RtpForwardingDestination forwardingDestination)
+    public void transcodeStream(String webrtcSdp, RtpForwardingDestination forwardingDestination)
             throws TranscodeStreamException {
         // Build the source SDP based on the one used for WebRTC
         Sdp sourceSdp = Sdp.fromRawSdp(webrtcSdp);
@@ -134,15 +120,15 @@ public class StreamServiceImpl implements StreamService {
         sourceSdp.setVideoPort(forwardingDestination.getVideoPort());
 
         // Build the RTMP URL
-        String urlPath = "/" + avlAppName + "/" + streamName;
+        String urlPath = "/" + avlAppName + "/" + forwardingDestination.getId();
         String authKey = generateAuthKey(urlPath, avlPushAuthPrimaryKey, avlPushAuthValidityPeriod);
         String rtmpUrl = "rtmp://" + avlPushDomainName + urlPath + "?auth_key=" + authKey;
 
         // Send the request to the transcoder server
-        LOGGER.info("Transcode the stream {} from {} to {}.", streamName, forwardingDestination, rtmpUrl);
+        LOGGER.info("Transcode the stream {} from {} to {}.", forwardingDestination.getId(), forwardingDestination, rtmpUrl);
         var restTemplate = new RestTemplate();
-        String transcoderUrl = "http://" + transcoderHostname + ":" + transcoderHttpPort + "/transcodings";
-        var context = new RtpToRtmpTranscodingContext(streamName, sourceSdp.toRawSdp(), rtmpUrl);
+        String transcoderUrl = "http://" + forwardingDestination.getIpAddress() + ":" + transcoderHttpPort + "/transcodings";
+        var context = new RtpToRtmpTranscodingContext(forwardingDestination.getId(), sourceSdp.toRawSdp(), rtmpUrl);
         var responseEntity = restTemplate.postForEntity(transcoderUrl, context, String.class);
         if (responseEntity.getStatusCode() != HttpStatus.OK) {
             throw new TranscodeStreamException(responseEntity.getBody());

@@ -1,8 +1,11 @@
 package com.alibaba.intl.livevideo.controllers;
 
-import com.alibaba.intl.livevideo.TranscodeStreamException;
-import com.alibaba.intl.livevideo.models.RtpForwardingDestination;
+import com.alibaba.intl.livevideo.exceptions.RtpForwardingDestinationException;
+import com.alibaba.intl.livevideo.exceptions.TranscodeStreamException;
 import com.alibaba.intl.livevideo.services.StreamService;
+import com.alibaba.intl.livevideocommons.models.RtpForwardingDestination;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +20,7 @@ import java.util.List;
 @RestController
 public class StreamController {
 
+    private final Logger LOGGER = LoggerFactory.getLogger(StreamController.class);
     private final StreamService streamService;
 
     public StreamController(StreamService streamService) {
@@ -38,8 +42,14 @@ public class StreamController {
      * @return Destination information.
      */
     @RequestMapping("/streams/{name}/forwarding-destination")
-    public RtpForwardingDestination getRtpForwardingDestination(@PathVariable String name) {
-        return streamService.getRtpForwardingDestination(name);
+    public ResponseEntity<RtpForwardingDestination> getRtpForwardingDestination(@PathVariable String name) {
+        try {
+            RtpForwardingDestination destination = streamService.getRtpForwardingDestination(name);
+            return ResponseEntity.ok(destination);
+        } catch (RtpForwardingDestinationException e) {
+            LOGGER.warn("Unable to provide a forwarding destination for the stream " + name + ".", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
     /**
@@ -55,8 +65,13 @@ public class StreamController {
             @PathVariable String name,
             @RequestPart("webrtcSdp") String webrtcSdp,
             @RequestPart("forwardingDestination") RtpForwardingDestination forwardingDestination) {
+        if (!name.equals(forwardingDestination.getId())) {
+            return ResponseEntity.badRequest().body("The name (" + name +
+                    ") doesn't corresponds to the forwarding destination id (" + forwardingDestination.getId() + ").");
+        }
+
         try {
-            streamService.transcodeStream(name, webrtcSdp, forwardingDestination);
+            streamService.transcodeStream(webrtcSdp, forwardingDestination);
         } catch (TranscodeStreamException e) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)

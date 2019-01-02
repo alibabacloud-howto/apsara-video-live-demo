@@ -23,7 +23,13 @@ Get access key
 
 
 ## Architecture
-This demos is composed of the following systems:
+The architecture of this demos
+* The demo should not require users to install a plugin on their computer. The web browser must be sufficient.
+* Apsara Video Live is compatible with [RTMP](https://en.wikipedia.org/wiki/Real-Time_Messaging_Protocol),
+  which is incompatible
+
+
+This demo is composed of the following systems:
 * A website: backend in [Spring Boot](https://spring.io/projects/spring-boot), frontend
   in [React](https://reactjs.org/).
 * [Apsara Video Live](https://www.alibabacloud.com/product/apsaravideo-for-live): a service that accepts video streams
@@ -33,6 +39,8 @@ This demos is composed of the following systems:
 * [Coturn](https://github.com/coturn/coturn), a STUN/TURN server that allows users behind a NAT to use WebRTC.
 * [FFmpeg](https://www.ffmpeg.org/), a video conversion and streaming tool: in this demo we use it to forward RTP
   stream from Janus to Apsara Video Live via RTMP. It also convert VP8/Opus data into H264/mp3.
+
+![Demo architecture](images/diagrams/avld-architecture.png)
 
 TODO show a schema about the "simplified" architecture.
 

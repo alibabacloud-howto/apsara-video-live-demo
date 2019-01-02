@@ -1,7 +1,8 @@
 package com.alibaba.intl.livevideo.services;
 
-import com.alibaba.intl.livevideo.TranscodeStreamException;
-import com.alibaba.intl.livevideo.models.RtpForwardingDestination;
+import com.alibaba.intl.livevideo.exceptions.RtpForwardingDestinationException;
+import com.alibaba.intl.livevideo.exceptions.TranscodeStreamException;
+import com.alibaba.intl.livevideocommons.models.RtpForwardingDestination;
 
 import java.util.List;
 
@@ -20,7 +21,7 @@ public interface StreamService {
     /**
      * @return Destination where Janus can forward the RTP data.
      */
-    RtpForwardingDestination getRtpForwardingDestination(String streamName);
+    RtpForwardingDestination getRtpForwardingDestination(String streamName) throws RtpForwardingDestinationException;
 
     /**
      * Start transcoding the RTP data from Janus to Apsara Video Live via RTMP.
@@ -28,7 +29,7 @@ public interface StreamService {
      * @param webrtcSdp             SDP file that describes the RTP stream between the web browser and Janus.
      * @param forwardingDestination Destination where Janus send its RTP data.
      */
-    void transcodeStream(String streamName, String webrtcSdp, RtpForwardingDestination forwardingDestination)
+    void transcodeStream(String webrtcSdp, RtpForwardingDestination forwardingDestination)
             throws TranscodeStreamException;
 
     /**

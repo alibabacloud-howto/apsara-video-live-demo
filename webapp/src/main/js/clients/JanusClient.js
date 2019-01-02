@@ -76,17 +76,17 @@ export default class JanusClient {
     /**
      * Ask Janus to forward the video stream to the given destination via the RTP protocol.
      *
-     * @param {string} destHostname
-     *     Destination hostname.
+     * @param {string} destIpAddress
+     *     Destination IP address.
      * @param {number} destAudioPort
      *     Destination port for the audio signal.
      * @param {number} destVideoPort
      *     Destination port for the video signal.
      * @return {Promise}
      */
-    forwardRtpStream(destHostname, destAudioPort, destVideoPort) {
-        console.log(`Forward stream via RTP (destination hostname: ` +
-            `${destHostname}, audio port: ${destAudioPort}, video port: ${destVideoPort}).`);
+    forwardRtpStream(destIpAddress, destAudioPort, destVideoPort) {
+        console.log(`Forward stream via RTP (destination IP address: ` +
+            `${destIpAddress}, audio port: ${destAudioPort}, video port: ${destVideoPort}).`);
 
         return new Promise(resolve => {
             this._videoRoomPluginHandle.send({
@@ -96,13 +96,13 @@ export default class JanusClient {
                     room: this._videoRoomNumber,
                     audiopt: 111,
                     videopt: 96,
-                    host: destHostname,
+                    host: destIpAddress,
                     audio_port: destAudioPort,
                     video_port: destVideoPort
                 },
                 success() {
-                    console.log(`Successfully forward stream via RTP (destination hostname: ` +
-                        `${destHostname}, audio port: ${destAudioPort}, video port: ${destVideoPort}).`);
+                    console.log(`Successfully forward stream via RTP (destination IP address: ` +
+                        `${destIpAddress}, audio port: ${destAudioPort}, video port: ${destVideoPort}).`);
                     resolve();
                 }
             });

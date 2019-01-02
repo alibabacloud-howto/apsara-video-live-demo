@@ -53,7 +53,7 @@ export default {
                         this.getRtpForwardingDestination(uniqueName)
                             .catch(error => onError('Unable to get the destination to forward the video data: ' + error))
                             .then(dest => {
-                                janusClient.forwardRtpStream(dest.hostname, dest.audioPort, dest.videoPort).then(() => {
+                                janusClient.forwardRtpStream(dest.ipAddress, dest.audioPort, dest.videoPort).then(() => {
                                     this.transcodeStream(uniqueName, sdp, dest)
                                         .catch(error => onError('Unable to transcode the stream: ' + error))
                                         .then(() => {

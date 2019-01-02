@@ -7,7 +7,8 @@ export default class RtpForwardingDestination {
 
     /**
      * @param {{
-     *     hostname: string?,
+     *     id: string?,
+     *     ipAddress: string?,
      *     audioPort: number?,
      *     videoPort: number?}?
      * } params
@@ -16,7 +17,10 @@ export default class RtpForwardingDestination {
         const p = params || {};
 
         /** @type {string} */
-        this.hostname = p.hostname || '';
+        this.id = p.id || '';
+
+        /** @type {string} */
+        this.ipAddress = p.ipAddress || '';
 
         /** @type {number} */
         this.audioPort = p.audioPort || 0;
