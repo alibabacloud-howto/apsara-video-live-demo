@@ -2,6 +2,7 @@
 
 ## Summary
 0. [Introduction](#introduction)
+1. [Prerequisite](#prerequisite)
 1. [Architecture](#architecture)
 2. [Apsara Video Live configuration](#apsara-video-live-configuration)
 3. [Installation](#installation)
@@ -17,34 +18,73 @@ This demo is composed of 3 pages:
 
 This demo doesn't require users to install any plugin: it uses WebRTC technology included in all modern web browsers.
 
-TODO prerequisite
-Register a domain.
-Get access key
-
+## Prerequisite
+Please [create an Alibaba Cloud account](https://www.alibabacloud.com/help/doc-detail/50482.htm) and
+[obtain an access key id and secret](https://www.alibabacloud.com/help/faq-detail/63482.htm).
 
 ## Architecture
-The architecture of this demos
-* The demo should not require users to install a plugin on their computer. The web browser must be sufficient.
-* Apsara Video Live is compatible with [RTMP](https://en.wikipedia.org/wiki/Real-Time_Messaging_Protocol),
-  which is incompatible
+In order to design the architecture of this project, it is important to take on consideration two constraints:
+* The demo should not require users to install any plugin or tool on their computer. The web browser must be sufficient.
+* Apsara Video Live is compatible with [RTMP](https://en.wikipedia.org/wiki/Real-Time_Messaging_Protocol) for
+  input signal, which is incompatible with standard web browser technologies such as HTML5.
 
+Fortunately web browsers natively support a technology that allow users to send their webcam video on internet: 
+[WebRTC](https://webrtc.org/). Thus, the chosen solution is to use WebRTC to lets users to broadcast their stream
+to our server, then convert this data to RTMP in order to forward it to Apsara Video Live.
 
-This demo is composed of the following systems:
-* A website: backend in [Spring Boot](https://spring.io/projects/spring-boot), frontend
-  in [React](https://reactjs.org/).
-* [Apsara Video Live](https://www.alibabacloud.com/product/apsaravideo-for-live): a service that accepts video streams
-  via the RTMP protocol and distribute them on internet via various protocols (RTMP, HLS and FLV).
-* [Janus](https://janus.conf.meetecho.com/), an open-source WebRTC gateway: in this demo we use it to forward video
-  data coming from WebRTC to FFmpeg via RTP.
-* [Coturn](https://github.com/coturn/coturn), a STUN/TURN server that allows users behind a NAT to use WebRTC.
-* [FFmpeg](https://www.ffmpeg.org/), a video conversion and streaming tool: in this demo we use it to forward RTP
-  stream from Janus to Apsara Video Live via RTMP. It also convert VP8/Opus data into H264/mp3.
+However establishing a WebRTC communication with a web browser and converting the video stream to RTMP is quite complex:
+* A WebRTC gateway is necessary for the first part of the solution. For that we will choose
+  [Janus](https://janus.conf.meetecho.com/), an open source server-side application that can establish a WebRTC
+  communication with web browsers and forward the video stream to another application via
+  [RTP](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Intro_to_RTP).
+* In order to convert a RTP stream (from Janus) to RTMP, we will use [FFmpeg](https://www.ffmpeg.org/), a video
+  conversion and streaming tool.
+* In addition to Janus, we will need [Coturn](https://github.com/coturn/coturn), a
+  [STUN / TURN server](https://www.html5rocks.com/en/tutorials/webrtc/infrastructure/#after-signaling-using-ice-to-cope-with-nats-and-firewalls)
+  that allows users behind a firewall to use WebRTC.
+
+The following diagram illustrates the architecture for this solution:
 
 ![Demo architecture](images/diagrams/avld-architecture.png)
 
-TODO show a schema about the "simplified" architecture.
+The blue arrows represent HTTP requests / responses. The orange arrows represent the audio + video data stream.
 
-TODO: mention about scalable architecture and give contact email.
+The complete flow in order to broadcast video data from one user to others is the following:
+0. A user, Alice, wants to broadcast video from her webcam and audio from her microphone. With a web browser,
+   she navigates to the `BroadcastPage` and enters a name for her stream.
+1. When she clicks on a start button, her web browser opens a HTTP connection to Janus, creates a "room" via
+   the `videoroom plugin`, then starts sending audio + video stream to this room by using the RTP protocol. Note that
+   Coturn is used to forward the RTP data stream from Alice to Janus in order to bypass Alice's firewall (Janus is
+   unable to function properly without Coturn, even if it has a public IP address).
+2. Once Alice's web browser is successfully transmitting audio + video data to Janus, this stream needs to be
+   forwarded to the `Transcoding server`. Thus, her web browser contacts this `Transcoding server` (relayed via the
+   web app server) in order to know which ports are available for this stream.
+3. The `Transcoding server` chooses available ports for the RTP stream (4 ports in total, 2 for audio and 2 for video
+   data) and sends back a response containing the ports and the IP address where to forward the stream (the IP address
+   is useful in case you want to scale transcoding into multiple servers behind a
+   [load balancer](https://www.alibabacloud.com/product/server-load-balancer)).
+4. When Alice's web browser receives the response containing the ports and IP address of the `Transcoding server`,
+   it sends a requests to Janus in order to forward the RTP stream to this destination.
+5. Once Janus is successfully sending the RTP stream to the `Transcoding server`, Alice's web browser sends a
+   request to `Transcoding server` (relayed via the web app server) in order to start transcoding the audio + video
+   stream to Apsara Video Live via the RTMP protocol.
+6. Another user, Bob, wants to watch Alice's stream. With his web browser he navigates to the `HomePage` where
+   he can have a list of all streams currently sent to Apsara Video Live (the web app server obtains this
+   list of streams by contacting Apsara Video Live via the
+   [Apsara Video Live SDK](https://github.com/aliyun/aliyun-openapi-java-sdk/tree/master/aliyun-java-sdk-live)).
+   Bob then clicks on Alice's stream and navigates to the `WatchPage`.
+7. Bob's web browser establishes a connection with Apsara Video Live via HTTP in order to receive audio and video
+   stream in the [FLV format](https://en.wikipedia.org/wiki/Flash_Video) (the web application uses
+   [Flv.js](https://github.com/Bilibili/flv.js/) to decode the stream in Javascript).
+
+As you can see this solution is quite complex, and to that we need to add TLS certificate management for HTTPS,
+[Cross-Origin Resource Sharing (CORS)](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) configuration and
+scaling.
+
+Finally, now that the most critical part of the solution is decided, we choose the following technologies to build the
+web application:
+* [Spring Boot](https://spring.io/projects/spring-boot) for the backend.
+* [React](https://reactjs.org/) and [Bootstrap](https://getbootstrap.com/) for the frontend.
 
 ### Apsara Video Live configuration
 In order to use Apsara Video Live, you need to register two domains, one for sending data (push), one for
@@ -145,3 +185,5 @@ cd infrastructure
 terraform init
 terraform apply
 ```
+
+TODO: create a section about scaling and support (provide a contact email address).

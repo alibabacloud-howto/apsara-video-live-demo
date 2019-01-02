@@ -113,7 +113,6 @@ export default class JanusClient {
      * @private
      */
     _preInitJanus() {
-        // TODO
         navigator.getUserMedia = navigator.mediaDevices.getUserMedia;
 
         Janus.init({
