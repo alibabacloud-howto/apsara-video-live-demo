@@ -64,7 +64,7 @@ The complete flow to broadcast video stream from one user to others is the follo
    is useful in case you want to scale transcoding into multiple servers behind a
    [load balancer](https://www.alibabacloud.com/product/server-load-balancer)).
 4. When Alice's web browser receives the response containing the ports and IP address of the `Transcoding server`,
-   it sends a requests to Janus in order to forward the RTP stream to this destination.
+   it sends a requests to Janus to let it forward the RTP stream to this destination.
 5. Once Janus is successfully sending the RTP stream to the `Transcoding server`, Alice's web browser sends a
    request to `Transcoding server` (relayed via the web app server) in order to start transcoding the audio + video
    stream to Apsara Video Live via the RTMP protocol.
