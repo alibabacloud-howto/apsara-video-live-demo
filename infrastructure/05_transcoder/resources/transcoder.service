@@ -1,0 +1,17 @@
+[Unit]
+Description=transcoder
+After=syslog.target
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/java -Xmx1800m -jar /opt/transcoder/transcoder.jar --spring.config.location=file:/etc/transcoder/application.properties
+SuccessExitStatus=143
+TimeoutStopSec=10
+Restart=on-failure
+RestartSec=5
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=transcoder
+
+[Install]
+WantedBy=multi-user.target

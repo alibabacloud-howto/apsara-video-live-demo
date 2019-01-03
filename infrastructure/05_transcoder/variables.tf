@@ -3,14 +3,9 @@ variable "domain_name" {
   default = "my-sample-domain.xyz"
 }
 
-variable "webapp_sub_domain_name" {
-  description = "Sub-domain name of the web application."
-  default = "livevideo"
-}
-
-variable "transcoding_sub_domain_name" {
+variable "transcoder_sub_domain_name" {
   description = "Sub-domain name of the transcoding server."
-  default = "livevideo-transcoding"
+  default = "livevideo-transcoder"
 }
 
 variable "ecs_root_password" {

@@ -24,6 +24,9 @@ This demo doesn't require users to install any plugin: it uses WebRTC technology
 Please [create an Alibaba Cloud account](https://www.alibabacloud.com/help/doc-detail/50482.htm) and
 [obtain an access key id and secret](https://www.alibabacloud.com/help/faq-detail/63482.htm).
 
+You also need to [buy a domain name](https://www.alibabacloud.com/domain) with Alibaba Cloud (e.g.
+"my-sample-domain.xyz").
+
 ## Architecture
 In order to design the architecture of this project, it is important to take on consideration two main constraints:
 * The demo should not require users to install any plugin or tool on their computer. The web browser must be sufficient.
@@ -481,19 +484,31 @@ Click on the stream. You should be able to watch the video:
 ![Watch page](images/webapp-watch-page.png)
 
 ## Cloud installation
-TODO Terraform script
+Installing and configuring all the servers is a complex operation. In order to makes things simpler we will use
+[Terraform](https://www.terraform.io/) to create and configure cloud resources.
+Please [install Terraform](https://learn.hashicorp.com/terraform/getting-started/install.html) on your computer.
 
+Open a terminal on your computer and execute the following commands:
 ```bash
+# Navigate to the location where you have downloaded this project
+cd ~/projects/apsara-video-live-demo
+
+# Configure the Terraform scripts
 export ALICLOUD_ACCESS_KEY="your-accesskey-id"
 export ALICLOUD_SECRET_KEY="your-accesskey-secret"
 export ALICLOUD_REGION="your-region-id"
 
-export TF_VAR_domain_name="your-domain.com"
-export TF_VAR_webapp_sub_domain_name="www"
-export TF_VAR_transcoding_sub_domain_name="transcoding"
-export TF_VAR_ecs_root_password="your-root-password"
+export TF_VAR_domain_name="my-sample-domain.xyz"
+export TF_VAR_transcoder_sub_domain_name="livevideo-transcoder"
+export TF_VAR_ecs_root_password="YourR00tPassword"
 
-cd infrastructure
+# Build the base infrastructure
+cd infrastructure/00_base
+terraform init
+terraform apply
+
+# Build the transcoder infrastructure
+cd ../05_transcoder
 terraform init
 terraform apply
 ```
