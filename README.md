@@ -108,7 +108,7 @@ Redo the same operation to create a streaming domain name:
 * Click on the "Add new domain" button;
 * Fill the form with the following parameters:
   * Domain Name = choose a sub-domain name such as "livevideo-pull.my-sample-domain.xyz" with "pull" in it
-  * Live Center = the closest region the the users who will broadcast their video
+  * Live Center = the closest region the the users who will watch the videos
   * Domain Type = Streaming Domain Name
   * CDN Accelerated Area = Outside Mainland China
 * Click on the "Next" button;
