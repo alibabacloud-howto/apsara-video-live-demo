@@ -3,9 +3,10 @@
 ## Summary
 0. [Introduction](#introduction)
 1. [Prerequisite](#prerequisite)
-1. [Architecture](#architecture)
-2. [Apsara Video Live configuration](#apsara-video-live-configuration)
-3. [Installation](#installation)
+2. [Architecture](#architecture)
+3. [Apsara Video Live configuration](#apsara-video-live-configuration)
+4. [Apsara Video Live test](#apsara-video-live-test)
+5. [Installation](#installation)
 
 ## Introduction
 The goal of this demo is to showcase [Apsara Video Live](https://www.alibabacloud.com/product/apsaravideo-for-live),
@@ -166,7 +167,36 @@ We now need to link the "push" and "pull" domains together:
   Ingest Domain Name";
 * In the popup, select your "push" domain (e.g. livevideo-push.my-sample-domain.xyz) and click on "OK".
 
-TODO explain how to test with OBS
+## Apsara Video Live test
+We can test this configuration by using [Open Broadcaster Software (OBS)](https://obsproject.com/download), a free
+and open source software for video recording and live streaming. Download and install this application to your
+computer.
+
+Before configuring OBS we need to get an URL where to send the video stream:
+* Go to the [ApsaraVideo Live console](https://live.console.aliyun.com/);
+* Click on the "Domains" left menu item;
+* Click on your push domain name (e.g. "livevideo-push.my-sample-domain.xyz");
+* Click on the "Access Control" left menu item.
+
+You should get a page similar to this screenshot:
+
+![Push domain access control](images/avl-push-domain-access-control.png)
+
+This page is in fact composed of two independent sections:
+* "Signed URL Settings" that displays all information to authenticate the stream sender;
+* "Generate Signed URL" that allow you to generate an RTMP URL with a valid authentication token.
+
+Go to the second section and fill the form in the following way:
+* Original URL = your push domain (e.g. "livevideo-push.my-sample-domain.xyz")
+* Cryptographic Key = copy-paste the "Primary Key" field value from the "Signed URL Settings" section above
+* Validity Period = 30
+
+Click on the "Generate" button to obtain an URL. As you can see on the following screenshot, the URL is:
+```
+rtmp://livevideo-push.my-sample-domain.xyz?auth_key=1546482046-0-0-dc8ddaaaec2dc3f6b6a48651f8dd5d91
+```
+![Push RTMP URL](images/avl-push-domain-access-control-rtmp-url.png)
+
 
 ## Installation
 TODO Terraform script
