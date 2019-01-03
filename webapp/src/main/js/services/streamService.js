@@ -120,7 +120,7 @@ export default {
      *     Stream name without the trailing UUID.
      */
     simplifyStreamName(name) {
-        return name.substring(0, name.indexOf('_'));
+        return name.substring(0, name.lastIndexOf('_'));
     },
 
     /**

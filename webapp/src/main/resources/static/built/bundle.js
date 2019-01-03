@@ -61911,7 +61911,7 @@ __webpack_require__.r(__webpack_exports__);
    *     Stream name without the trailing UUID.
    */
   simplifyStreamName: function simplifyStreamName(name) {
-    return name.substring(0, name.indexOf('_'));
+    return name.substring(0, name.lastIndexOf('_'));
   },
 
   /**
