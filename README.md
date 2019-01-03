@@ -6,7 +6,8 @@
 2. [Architecture](#architecture)
 3. [Apsara Video Live configuration](#apsara-video-live-configuration)
 4. [Apsara Video Live test](#apsara-video-live-test)
-5. [Installation](#installation)
+5. [Compiling and running the application locally](#compiling-and-running-the-application-locally)
+6. [Cloud installation](#cloud-installation)
 
 ## Introduction
 The goal of this demo is to showcase [Apsara Video Live](https://www.alibabacloud.com/product/apsaravideo-for-live),
@@ -90,7 +91,7 @@ web application:
 ### Apsara Video Live configuration
 Before building the application, we need to register two domains in Apsara Video Live, one for sending data
 (push domain), one for receiving (pull domain):
-* Go to the [ApsaraVideo Live console](https://live.console.aliyun.com/);
+* Go to the [Apsara Video Live console](https://live.console.aliyun.com/);
 * Click on the "Domain Names" left menu item;
 * Click on the "Add new domain" button;
 * Fill the form with the following parameters:
@@ -138,7 +139,7 @@ Your DNS entries should look like this:
 ![DNS entries for push sub-domain](images/dns-entry-push-entry.png)
 
 We can now configure the "pull" domain. Go back to your domain names list in the
-[ApsaraVideo Live console](https://live.console.aliyun.com/). You should now have a CNAME entry next to your "pull"
+[Apsara Video Live console](https://live.console.aliyun.com/). You should now have a CNAME entry next to your "pull"
 domain:
 
 ![Pull domain enabled](images/avl-pull-domain-enabled.png)
@@ -161,7 +162,7 @@ Your DNS entries should be similar to this:
 ![Push and pull DNS entries](images/dns-entry-push-and-pull-entries.png)
 
 We now need to link the "push" and "pull" domains together:
-* Go back to your domain names list in the [ApsaraVideo Live console](https://live.console.aliyun.com/);
+* Go back to your domain names list in the [Apsara Video Live console](https://live.console.aliyun.com/);
 * Next to your "pull" domain, click on the "Configure" link;
 * In the new page, click on the button with the "pen" icon for "Stream Pushing Information > 
   Ingest Domain Name";
@@ -173,7 +174,7 @@ and open source software for video recording and live streaming. Download and in
 computer.
 
 Before configuring OBS we need to get an URL where to send the video stream:
-* Go to the [ApsaraVideo Live console](https://live.console.aliyun.com/);
+* Go to the [Apsara Video Live console](https://live.console.aliyun.com/);
 * Click on the "Domains" left menu item;
 * Click on your push domain name (e.g. "livevideo-push.my-sample-domain.xyz");
 * Click on the "Access Control" left menu item.
@@ -241,7 +242,232 @@ Congratulation if you can see yourself! It means the Apsara Video Live configura
 
 ![Play sample stream](images/avl-play-sample-stream.png)
 
-## Installation
+## Compiling and running the application locally
+Please install [Java JDK 11+](https://adoptopenjdk.net/installation.html?variant=openjdk11&jvmVariant=hotspot) and
+[Maven 3.6.x+](https://maven.apache.org/install.html) on your computer.
+
+Before we can compile and run the web application, we first need to install and execute Janus and Coturn. Open a
+terminal and type the following commands:
+```bash
+# Go to a folder where you want to setup Janus and Coturn
+cd ~/tools
+```
+If you are using Ubuntu Linux, you need to install the following dependencies:
+```bash
+apt-get install libmicrohttpd-dev libjansson-dev libnice-dev \
+    libssl-dev libsrtp-dev libsofia-sip-ua-dev libglib2.0-dev \
+    libopus-dev libogg-dev libcurl4-openssl-dev liblua5.3-dev \
+    pkg-config gengetopt libtool automake libcurl4-openssl-dev
+    
+wget https://github.com/cisco/libsrtp/archive/v2.2.0.zip
+unzip v2.2.0.zip
+cd libsrtp-2.2.0
+./configure
+make
+sudo make install
+cd ..
+```
+If you are using Mac OSX, you need to install the following dependencies:
+```bash
+brew install jansson libnice openssl srtp libusrsctp libmicrohttpd \
+    libwebsockets cmake rabbitmq-c sofia-sip opus libogg curl glib \
+    libconfig pkg-config gengetopt autoconf automake libtool
+```
+We can now download and compile Janus:
+```bash
+# Download Janus
+wget https://github.com/meetecho/janus-gateway/archive/v0.4.2.zip
+unzip v0.4.2.zip
+cd janus-gateway-0.4.2
+
+# Compile Janus
+sh autogen.sh
+./configure --disable-websockets --disable-data-channels --disable-rabbitmq --disable-mqtt --disable-plugin-audiobridge
+make
+sudo make install
+sudo make configs
+cd ..
+```
+Note: if you use Mac OSX, you might need to replace the `./configure` command with the following one:
+```bash
+./configure --disable-websockets --disable-data-channels --disable-rabbitmq --disable-mqtt \
+    --disable-plugin-audiobridge --prefix=/usr/local/janus PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig
+```
+Check you Janus configuration with the following command:
+```bash
+janus --version
+```
+It should output something like this:
+```
+Janus commit: not-a-git-repo
+Compiled on:  Fri Dec 28 15:30:01 CST 2018
+
+janus 0.4.2
+```
+Start Janus with the following command:
+```bash
+janus
+```
+
+Let's continue with Coturn. If you are using Ubuntu Linux, run:
+```bash
+apt-get install coturn
+```
+If you are using Mac OSX, run:
+```bash
+brew install coturn
+```
+Coturn needs to be configured. If you are using Ubuntu Linux, edit the file "/etc/default/coturn", find the
+following line and uncomment it by removing '#' symbol:
+```
+#TURNSERVER_ENABLED=1
+```
+Note: this operation above is not necessary on Mac OSX.
+
+Edit the main Coturn configuration file: on Ubuntu Linux the file is located at "/etc/turnserver.conf"; on MacOSX
+the file is located at "/usr/local/Cellar/coturn/4.5.0.7/etc/turnserver.conf.default":
+* Uncomment "#fingerprint"
+* Add a line "user=livevideo:LivevideoPassword2018"
+* Add a line "external-ip=30.43.48.75/127.0.0.1" where "30.43.48.75" is the machine private IP address
+* Add a line "server-name=localhost"
+* Add a line "realm=localhost"
+
+Start Coturn with the following command:
+```bash
+turnserver -c /etc/turnserver.conf -v
+```
+
+Check that your system has FFMPEG version 4.x+:
+```bash
+# Check ffmpeg version
+ffmpeg
+```
+If your system doesn't have FFMPEG or has an old version, you need to install it:
+* On Ubuntu Linux, you can install FFMPEG with the following commands:
+  ```bash
+  sudo add-apt-repository ppa:jonathonf/ffmpeg-4
+  sudo apt-get update
+  sudo apt-get install ffmpeg
+  ```
+* On Mac OSX, you can install FFMPEG with the following commands:
+  ```bash
+  brew install ffmpeg
+  ```
+
+Download this repository on your computer, open the file "transcoder/src/main/resources/application.properties":
+```properties
+# Web server port
+server.port=8090
+
+# Folder where SDP files are saved. Their goal is to tell FFMPEG some information about the RTP stream, such as
+# the ports, codecs, etc.
+transcoding.ffmpegSdpFileFolderPath=/tmp
+
+# Path to the FFMPEG executable
+transcoding.ffmpegExecutablePath=/usr/local/Cellar/ffmpeg/4.1_1/bin/ffmpeg
+
+# Port ranges available for RTP data
+transcoding.rtpPortRangeStart=30000
+transcoding.rtpPortRangeEnd=50000
+transcoding.unusedPortTimeoutMillis=120000
+```
+Change the value of the property `transcoding.ffmpegExecutablePath` to where ffmpeg is installed on your system.
+
+Edit the file "webapp/src/main/resources/application.properties":
+```properties
+# Janus (WebRTC Gateway) configuration
+janus.hostname=localhost
+janus.httpPort=8088
+janus.httpsPort=8089
+janus.httpPath=/janus
+
+# STUN/TURN server configuration
+turnServer.url=turn:localhost:3478
+turnServer.username=livevideo
+turnServer.password=LivevideoPassword2018
+
+# Transcoder configuration (note: HTTP and HTTPS ports use TCP whereas the ones for audio and video use UDP)
+transcoder.hostname=localhost
+transcoder.httpPort=8090
+
+# Apsara Video Live
+apsaraVideoLive.accessKeyId=your-access-key-id
+apsaraVideoLive.accessKeySecret=your-access-key-secret
+apsaraVideoLive.regionId=ap-southeast-1
+apsaraVideoLive.pullDomainName=livevideo-pull.my-sample-domain.xyz
+apsaraVideoLive.pushDomainName=livevideo-push.my-sample-domain.xyz
+apsaraVideoLive.appName=livevideo
+apsaraVideoLive.pushAuthPrimaryKey=WX80lCZaw2
+apsaraVideoLive.pushAuthValidityPeriod=1800
+apsaraVideoLive.pullAuthPrimaryKey=0hBanJ7P97
+apsaraVideoLive.pullAuthValidityPeriod=1800
+```
+Apply the following changes in this file:
+* Set your access key id and secret into `apsaraVideoLive.accessKeyId` and `apsaraVideoLive.accessKeySecret`.
+* If necessary, change the region ID (you can find your closest region ID in
+  [this document](https://www.alibabacloud.com/help/doc-detail/40654.htm)).
+* Set your pull and push domain names in `apsaraVideoLive.pullDomainName` and `apsaraVideoLive.pushDomainName`.
+* Set the `apsaraVideoLive.pullAuthPrimaryKey` and `apsaraVideoLive.pushAuthPrimaryKey` with the "Primary Key" values
+  provided by the [Apsara Video Live console](https://live.console.aliyun.com/) (go to "Domains", select your pull
+  domain first, go to "Access Control", select the "URL Authentication" tab, copy the "Primary Key", then go back to
+  the "Domains" page, select the push domain, go to "Access Control" and copy the "Primary Key").
+
+We can finally compile and launch the web application! Open a terminal and type:
+```bash
+# Navigate to the location where you have downloaded this project
+cd ~/projects/apsara-video-live-demo
+
+# Compile the application
+mvn clean install
+```
+The compilation needs several minutes to complete (Maven needs to download the dependencies for the backend and
+frontend). The result should look like this:
+```
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary:
+[INFO] 
+[INFO] apsara-video-live-demo 1.0.0 ....................... SUCCESS [  0.342 s]
+[INFO] apsara-video-live-demo-commons ..................... SUCCESS [  1.503 s]
+[INFO] apsara-video-live-demo-webapp ...................... SUCCESS [ 18.525 s]
+[INFO] apsara-video-live-demo-transcoder 1.0.0 ............ SUCCESS [  0.582 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 21.653 s
+[INFO] Finished at: 2019-01-03T10:46:56+08:00
+[INFO] ------------------------------------------------------------------------
+```
+You can now start the "Transcoding server":
+```bash
+cd transcoder
+mvn spring-boot:run
+```
+The server should start and print the logs:
+```
+2019-01-03 11:37:12.073  INFO 15958 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8090 (http) with context path ''
+2019-01-03 11:37:12.081  INFO 15958 --- [           main] c.a.i.livevideotranscoder.Application    : Started Application in 2.149 seconds (JVM running for 5.525)
+```
+Open another terminal and execute the main web application server:
+```bash
+# Navigate to the location where you have downloaded this project
+cd ~/projects/apsara-video-live-demo
+
+cd webapp
+mvn spring-boot:run
+```
+The server should start and print the logs:
+```
+2019-01-03 11:39:03.326  INFO 16025 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''
+2019-01-03 11:39:03.332  INFO 16025 --- [           main] com.alibaba.intl.livevideo.Application   : Started Application in 2.142 seconds (JVM running for 15.699)
+```
+
+Open [Firefox](https://www.mozilla.org/en-US/firefox/), install the
+[CORS Everywhere add-on](https://addons.mozilla.org/en-US/firefox/addon/cors-everywhere/), click on the icon of
+this add-on to disable CORS check for all websites, and navigate to "http://localhost:8080":
+
+![Home page](images/webapp-homepage.png)
+
+## Cloud installation
 TODO Terraform script
 
 ```bash
