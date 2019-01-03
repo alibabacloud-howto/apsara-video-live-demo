@@ -467,6 +467,19 @@ this add-on to disable CORS check for all websites, and navigate to "http://loca
 
 ![Home page](images/webapp-homepage.png)
 
+Click on the "Broadcast my video" button, choose a name for your stream and click on the "Start" button. The broadcast
+page should look like this:
+
+![Broadcast page](images/webapp-broadcast-page.png)
+
+In another Firefox tab, open "http://localhost:8080" and look at the available streams:
+
+![Home page streams](images/webapp-home-page-streams.png)
+
+Click on the stream. You should be able to watch the video:
+
+![Watch page](images/webapp-watch-page.png)
+
 ## Cloud installation
 TODO Terraform script
 
