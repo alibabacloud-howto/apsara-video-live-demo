@@ -187,16 +187,59 @@ This page is in fact composed of two independent sections:
 * "Generate Signed URL" that allow you to generate an RTMP URL with a valid authentication token.
 
 Go to the second section and fill the form in the following way:
-* Original URL = your push domain (e.g. "livevideo-push.my-sample-domain.xyz")
+* Original URL = rtmp://your-push-domain/sample-app/sample-stream
+  (e.g. "rtmp://livevideo-push.my-sample-domain.xyz/sample-app/sample-stream")
 * Cryptographic Key = copy-paste the "Primary Key" field value from the "Signed URL Settings" section above
 * Validity Period = 30
 
 Click on the "Generate" button to obtain an URL. As you can see on the following screenshot, the URL is:
 ```
-rtmp://livevideo-push.my-sample-domain.xyz?auth_key=1546482046-0-0-dc8ddaaaec2dc3f6b6a48651f8dd5d91
+rtmp://livevideo-push.my-sample-domain.xyz/sample-app/sample-stream?auth_key=1546482883-0-0-7c5a077514e3a8e6913a8234e8b88976
 ```
 ![Push RTMP URL](images/avl-push-domain-access-control-rtmp-url.png)
 
+Now execute OBS on your computer and configure it in the following way:
+* Configure one scene with one "Video Capture Device" source and select your webcam (note the resolution of your
+  webcam, for example 1280x720);
+  
+  ![OBS scene and source](images/obs-scene-source.png)
+  
+  ![OBS video capture device](images/obs-video-capture-device.png)
+  
+* Go to the "Settings" and go to the "Video" tab; set the "Base (Canvas) Resolution" and "Output (Canvas) Resolution"
+  to the same value as your webcam (e.g. 1280x720);
+  
+  ![OBS video settings](images/obs-settings-video.png)
+  
+* Still in the "Settings" window, go to the "Stream" tab; fill the form with the following values:
+  * Stream Type = Custom Streaming Server
+  * URL = your push URL truncated after "sample-app/" (e.g. "rtmp://livevideo-push.my-sample-domain.xyz/sample-app/")
+  * Stream key = the rest of the push URL
+    (e.g. "sample-stream?auth_key=1546482883-0-0-7c5a077514e3a8e6913a8234e8b88976")
+  * Use authentication = unchecked
+  
+  ![OBS stream settings](images/obs-settings-stream.png)
+
+Click on the "OK" button to save your settings, then click on the "Start Streaming" button. After few seconds
+the status bar at the bottom of OBS should look like this:
+
+![OBS status bar while streaming](images/obs-status-bar-while-streaming.png)
+
+Keep OBS running in the background. With your web browser, go back to the Apsara Video Live console:
+* Click on the "Stream Management > Ingest Endpoints" menu item; you should be able to see your "sample-stream":
+
+  ![Sample stream in Apsara Video Live](images/avl-ingest-endpoint-sample-stream.png)
+
+* Click on the "View URLs" link on the right of your "sample-stream"; you should b able to see three URLs:
+
+  ![Sample stream URLs](images/avl-sample-stream-urls.png)
+
+* Put your mouse cursor on top of the first URL: two links should appear, "Copy" and "Play"; click on "Play";
+* A new popup should appear. If you use Google Chrome, you will need to click to enable "Adobe Flash Player";
+
+Congratulation if you can see yourself! It means the Apsara Video Live configuration is correct.
+
+![Play sample stream](images/avl-play-sample-stream.png)
 
 ## Installation
 TODO Terraform script
