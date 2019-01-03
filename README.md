@@ -23,19 +23,19 @@ Please [create an Alibaba Cloud account](https://www.alibabacloud.com/help/doc-d
 [obtain an access key id and secret](https://www.alibabacloud.com/help/faq-detail/63482.htm).
 
 ## Architecture
-In order to design the architecture of this project, it is important to take on consideration two constraints:
+In order to design the architecture of this project, it is important to take on consideration two main constraints:
 * The demo should not require users to install any plugin or tool on their computer. The web browser must be sufficient.
-* Apsara Video Live is compatible with [RTMP](https://en.wikipedia.org/wiki/Real-Time_Messaging_Protocol) for
-  input signal, which is incompatible with standard web browser technologies such as HTML5.
+* Apsara Video Live expects [RTMP](https://en.wikipedia.org/wiki/Real-Time_Messaging_Protocol) for
+  input streams, which is incompatible with standard web browser technologies such as HTML5.
 
-Fortunately web browsers natively support a technology that allow users to send their webcam video on internet: 
+Fortunately web browsers natively support a technology that allows users to send their webcam video on internet: 
 [WebRTC](https://webrtc.org/). Thus, the chosen solution is to use WebRTC to lets users to broadcast their stream
 to our server, then convert this data to RTMP in order to forward it to Apsara Video Live.
 
 However establishing a WebRTC communication with a web browser and converting the video stream to RTMP is quite complex:
 * A WebRTC gateway is necessary for the first part of the solution. For that we will choose
-  [Janus](https://janus.conf.meetecho.com/), an open source server-side application that can establish a WebRTC
-  communication with web browsers and forward the video stream to another application via
+  [Janus](https://janus.conf.meetecho.com/), an open source server-side application that cans establish a WebRTC
+  communication with web browsers and forward the video streams to another application via
   [RTP](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Intro_to_RTP).
 * In order to convert a RTP stream (from Janus) to RTMP, we will use [FFmpeg](https://www.ffmpeg.org/), a video
   conversion and streaming tool.
@@ -47,9 +47,9 @@ The following diagram illustrates the architecture for this solution:
 
 ![Demo architecture](images/diagrams/avld-architecture.png)
 
-The blue arrows represent HTTP requests / responses. The orange arrows represent the audio + video data stream.
+The blue arrows represent HTTP traffic. The orange arrows represent the audio + video data stream.
 
-The complete flow in order to broadcast video data from one user to others is the following:
+The complete flow to broadcast video stream from one user to others is the following:
 0. A user, Alice, wants to broadcast video from her webcam and audio from her microphone. With a web browser,
    she navigates to the `BroadcastPage` and enters a name for her stream.
 1. When she clicks on a start button, her web browser opens a HTTP connection to Janus, creates a "room" via
