@@ -66,13 +66,13 @@ The complete flow to broadcast video stream from one user to others is the follo
 4. When Alice's web browser receives the response containing the ports and IP address of the `Transcoding server`,
    it sends a requests to Janus to let it forward the RTP stream to this destination.
 5. Once Janus is successfully sending the RTP stream to the `Transcoding server`, Alice's web browser sends a
-   request to `Transcoding server` (relayed via the web app server) in order to start transcoding the audio + video
+   request to the `Transcoding server` (relayed via the web app server) in order to start transcoding the audio + video
    stream to Apsara Video Live via the RTMP protocol.
 6. Another user, Bob, wants to watch Alice's stream. With his web browser he navigates to the `HomePage` where
    he can have a list of all streams currently sent to Apsara Video Live (the web app server obtains this
    list of streams by contacting Apsara Video Live via the
    [Apsara Video Live SDK](https://github.com/aliyun/aliyun-openapi-java-sdk/tree/master/aliyun-java-sdk-live)).
-   Bob then clicks on Alice's stream and navigates to the `WatchPage`.
+   Bob then selects Alice's stream and navigates to the `WatchPage`.
 7. Bob's web browser establishes a connection with Apsara Video Live via HTTP in order to receive audio and video
    stream in the [FLV format](https://en.wikipedia.org/wiki/Flash_Video) (the web application uses
    [Flv.js](https://github.com/Bilibili/flv.js/) to decode the stream in Javascript).
