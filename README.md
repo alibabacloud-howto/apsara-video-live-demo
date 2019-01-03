@@ -87,8 +87,8 @@ web application:
 * [React](https://reactjs.org/) and [Bootstrap](https://getbootstrap.com/) for the frontend.
 
 ### Apsara Video Live configuration
-In order to use Apsara Video Live, you need to register two domains, one for sending data (push), one for
-receiving (pull):
+Before building the application, we need to register two domains in Apsara Video Live, one for sending data
+(push domain), one for receiving (pull domain):
 * Go to the [ApsaraVideo Live console](https://live.console.aliyun.com/);
 * Click on the "Domain Names" left menu item;
 * Click on the "Add new domain" button;
