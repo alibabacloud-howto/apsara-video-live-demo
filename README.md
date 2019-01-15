@@ -500,6 +500,7 @@ export ALICLOUD_REGION="your-region-id"
 
 export TF_VAR_domain_name="my-sample-domain.xyz"
 export TF_VAR_transcoder_sub_domain_name="livevideo-transcoder"
+export TF_VAR_turnstun_sub_domain_name="livevideo-turnstun"
 export TF_VAR_ecs_root_password="YourR00tPassword"
 
 # Build the base infrastructure
@@ -509,6 +510,11 @@ terraform apply
 
 # Build the transcoder infrastructure
 cd ../05_transcoder
+terraform init
+terraform apply
+
+# Build the TURN / STUN server infrastructure
+cd ../10_turn_stun_server
 terraform init
 terraform apply
 ```

@@ -1,0 +1,16 @@
+[Unit]
+Description=turnserver - coturn TURN server
+After=syslog.target
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/turnserver -c /etc/turnserver.conf -o -v
+Type=forking
+PIDFile=/var/run/turnserver.pid
+Restart=always
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=coturn
+
+[Install]
+WantedBy=default.target

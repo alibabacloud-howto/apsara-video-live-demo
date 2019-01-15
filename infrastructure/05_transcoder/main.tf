@@ -16,7 +16,7 @@ data "alicloud_vswitches" "avld_vswitches" {
   name_regex = "avld-vswitch"
 }
 
-// Security group and rule
+// Security group and rules
 resource "alicloud_security_group" "avld_transcoder_security_group" {
   name = "avld-transcoder-security-group"
   vpc_id = "${data.alicloud_vpcs.avld_vpcs.vpcs.0.id}"
