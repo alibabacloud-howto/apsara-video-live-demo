@@ -146,7 +146,10 @@ resource "alicloud_instance" "avld_transcoder_ecs" {
       user = "root"
       password = "${var.ecs_root_password}"
     }
-    inline = "/tmp/install_transcoder.sh ${var.transcoder_sub_domain_name}.${var.domain_name} ${var.transcoder_sub_domain_name}-vpc.${var.domain_name}"
+    inline = [
+      "chmod +x /tmp/install_transcoder.sh",
+      "/tmp/install_transcoder.sh ${var.transcoder_sub_domain_name}.${var.domain_name} ${var.transcoder_sub_domain_name}-vpc.${var.domain_name}"
+    ]
   }
 }
 

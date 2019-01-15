@@ -22,14 +22,15 @@ apt-get -y upgrade
 
 # Install JDK 11
 echo "Install OpenJDK 11"
-apt-get -y install software-properties-common
-add-apt-repository -y ppa:linuxuprising/java
-apt-get update
-echo oracle-java11-installer shared/accepted-oracle-license-v1-2 select true | sudo /usr/bin/debconf-set-selections
-apt-get -y install oracle-java11-installer
+apt-get -y install default-jdk
+wget https://download.java.net/java/GA/jdk11/13/GPL/openjdk-11.0.1_linux-x64_bin.tar.gz -O /tmp/openjdk-11.tar.gz
+tar xfvz /tmp/openjdk-11.tar.gz --directory /usr/lib/jvm
+for bin in /usr/lib/jvm/jdk-11.0.1/bin/*; do update-alternatives --install /usr/bin/$(basename ${bin}) $(basename ${bin}) ${bin} 100; done
+for bin in /usr/lib/jvm/jdk-11.0.1/bin/*; do update-alternatives --set $(basename ${bin}) ${bin}; done
 
 # Install FFMPEG
 echo "Install Ffmpeg"
+apt-get -y install software-properties-common
 add-apt-repository -y ppa:jonathonf/ffmpeg-4
 apt-get update
 apt-get -y install ffmpeg
@@ -61,5 +62,5 @@ cp /tmp/transcoder.service /etc/systemd/system/
 echo "Start the transcoder app and Nginx"
 systemctl start transcoder.service
 systemctl enable transcoder.service
-systemctl start nginx
+systemctl restart nginx
 systemctl enable nginx
