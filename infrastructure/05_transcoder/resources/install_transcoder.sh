@@ -2,18 +2,11 @@
 #
 # Transcoder installation script.
 #
-# Arguments:
-# $1 = public domain name (e.g. livevideo-transcoder.my-sample-domain.xyz)
-# $2 = internal domain name (e.g. livevideo-transcoder-vpc.my-sample-domain.xyz)
-#
 # The following resources are expected in the /tmp folder:
 # /tmp/nginx-transcoder.conf
 # /tmp/application.properties
 # /tmp/transcoder.jar
 # /tmp/transcoder.service
-
-PUBLIC_DOMAIN=$1
-INTERNAL_DOMAIN=$2
 
 # Update the distribution
 export DEBIAN_FRONTEND=noninteractive
@@ -41,11 +34,8 @@ apt-get -y install nginx
 
 # Configure Nginx
 echo "Configure Nginx"
-export ESCAPED_PUBLIC_DOMAIN=$(echo ${PUBLIC_DOMAIN} | sed -e 's/\\/\\\\/g; s/\//\\\//g; s/&/\\\&/g')
-export ESCAPED_INTERNAL_DOMAIN=$(echo ${INTERNAL_DOMAIN} | sed -e 's/\\/\\\\/g; s/\//\\\//g; s/&/\\\&/g')
-sed -i "s/public\.example\.com/${ESCAPED_PUBLIC_DOMAIN}/" /tmp/nginx-transcoder.conf
-sed -i "s/internal\.example\.com/${ESCAPED_INTERNAL_DOMAIN}/" /tmp/nginx-transcoder.conf
 cp /tmp/nginx-transcoder.conf /etc/nginx/conf.d/transcoder.conf
+rm /etc/nginx/sites-enabled/default
 
 # Configure the application
 echo "Configure the transcoder app"

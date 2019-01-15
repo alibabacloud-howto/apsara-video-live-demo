@@ -130,26 +130,13 @@ resource "alicloud_instance" "avld_transcoder_ecs" {
     destination = "/tmp/application.properties"
   }
 
-  provisioner "file" {
-    connection {
-      host = "${alicloud_instance.avld_transcoder_ecs.public_ip}"
-      user = "root"
-      password = "${var.ecs_root_password}"
-    }
-    source = "resources/install_transcoder.sh"
-    destination = "/tmp/install_transcoder.sh"
-  }
-
   provisioner "remote-exec" {
     connection {
       host = "${alicloud_instance.avld_transcoder_ecs.public_ip}"
       user = "root"
       password = "${var.ecs_root_password}"
     }
-    inline = [
-      "chmod +x /tmp/install_transcoder.sh",
-      "/tmp/install_transcoder.sh ${var.transcoder_sub_domain_name}.${var.domain_name} ${var.transcoder_sub_domain_name}-vpc.${var.domain_name}"
-    ]
+    script = "resources/install_transcoder.sh"
   }
 }
 
