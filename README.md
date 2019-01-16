@@ -171,6 +171,16 @@ We now need to link the "push" and "pull" domains together:
   Ingest Domain Name";
 * In the popup, select your "push" domain (e.g. livevideo-push.my-sample-domain.xyz) and click on "OK".
 
+Finally, we need to add some HTTP header configuration in order to solve
+[CORS problems](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS):
+* Go back to your domain names list in the [Apsara Video Live console](https://live.console.aliyun.com/);
+* Next to your "pull" domain, click on the "Configure" link;
+* In the new page, click on the "HTTP Header Settings" left menu item;
+* Click on the "Add" button; in the new popup, select the `Access-Control-Allow-Origin` header, and set the value `*`;
+* Click on OK to confirm; the configuration should look like this:
+
+![Pull domain HTTP header settings](images/avl-pull-domain-header-settings.png)
+
 ## Apsara Video Live test
 We can test this configuration by using [Open Broadcaster Software (OBS)](https://obsproject.com/download), a free
 and open source software for video recording and live streaming. Download and install this application to your
