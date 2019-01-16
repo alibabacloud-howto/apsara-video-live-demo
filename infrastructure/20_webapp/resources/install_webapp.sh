@@ -121,7 +121,7 @@ cp /tmp/webapp.service /etc/systemd/system/
 
 # Start and enable the application and Nginx
 echo "Start the webapp app and Nginx"
-#systemctl start webapp.service
-#systemctl enable webapp.service
-#systemctl restart nginx
-#systemctl enable nginx
+systemctl start webapp.service
+systemctl enable webapp.service
+systemctl restart nginx
+systemctl enable nginx
