@@ -1,0 +1,17 @@
+[Unit]
+Description=webapp
+After=syslog.target
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/java -Xmx1800m -jar /opt/webapp/webapp.jar --spring.config.location=file:/etc/webapp/application.properties
+SuccessExitStatus=143
+TimeoutStopSec=10
+Restart=on-failure
+RestartSec=5
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=webapp
+
+[Install]
+WantedBy=multi-user.target

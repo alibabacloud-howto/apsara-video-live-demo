@@ -502,9 +502,20 @@ export TF_VAR_domain_name="my-sample-domain.xyz"
 export TF_VAR_transcoder_sub_domain_name="livevideo-transcoder"
 export TF_VAR_turnstun_sub_domain_name="livevideo-turnstun"
 export TF_VAR_webrtcgw_sub_domain_name="livevideo-webrtcgw"
+export TF_VAR_webapp_sub_domain_name="livevideo"
 export TF_VAR_ecs_root_password="YourR00tPassword"
 export TF_VAR_turn_user="livevideo"
 export TF_VAR_turn_password="YourTurnPassw0rd"
+export TF_VAR_apsaravideolive_user_accesskey_id="avl-access-key-id"
+export TF_VAR_apsaravideolive_user_accesskey_secret="avl-access-key-secret"
+export TF_VAR_apsaravideolive_region_id="ap-southeast-1"
+export TF_VAR_apsaravideolive_push_domain="livevideo-push.my-sample-domain.xyz"
+export TF_VAR_apsaravideolive_pull_domain="livevideo-pull.my-sample-domain.xyz"
+export TF_VAR_apsaravideolive_app_name="livevideo"
+export TF_VAR_apsaravideolive_push_auth_primary_key="push-primary-key"
+export TF_VAR_apsaravideolive_push_auth_validity_period=1800
+export TF_VAR_apsaravideolive_pull_auth_primary_key="pull-primary-key"
+export TF_VAR_apsaravideolive_pull_auth_validity_period=1800
 
 # Build the base infrastructure
 cd infrastructure/00_base
@@ -523,6 +534,11 @@ terraform apply
 
 # Build the WebRTC gateway infrastructure
 cd ../15_webrtc_gateway
+terraform init
+terraform apply
+
+# Build the web application infrastructure
+cd ../20_webapp
 terraform init
 terraform apply
 ```
