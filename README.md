@@ -553,4 +553,6 @@ terraform init
 terraform apply
 ```
 
+You can test the web application by browsing to its URL (e.g. http://livevideo.my-sample-domain.xyz).
+
 TODO: create a section about scaling and support (provide a contact email address).
