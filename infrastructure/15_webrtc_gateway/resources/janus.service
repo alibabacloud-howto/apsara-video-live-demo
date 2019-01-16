@@ -1,0 +1,16 @@
+[Unit]
+Description=Janus WebRTC Server
+After=syslog.target
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/janus -o
+Restart=on-abnormal
+LimitNOFILE=65536
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=janus
+
+[Install]
+WantedBy=multi-user.target

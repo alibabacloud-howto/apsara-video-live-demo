@@ -3,6 +3,11 @@ variable "domain_name" {
   default = "my-sample-domain.xyz"
 }
 
+variable "webrtcgw_sub_domain_name" {
+  description = "Sub-domain name of the WebRTC gateway."
+  default = "livevideo-webrtcgw"
+}
+
 variable "turnstun_sub_domain_name" {
   description = "Sub-domain name of the TURN / STUN server."
   default = "livevideo-turnstun"

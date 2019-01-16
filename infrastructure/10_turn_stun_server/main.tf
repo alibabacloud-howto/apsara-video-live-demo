@@ -144,7 +144,7 @@ resource "alicloud_instance" "avld_turnstun_instance_ecs" {
     }
     inline = [
       "chmod +x /tmp/install_turnstun_server.sh",
-      "/tmp/install_turnstun_server.sh ${var.turnstun_sub_domain_name}.${var.domain_name} ${alicloud_instance.avld_turnstun_instance_ecs.public_ip}"
+      "/tmp/install_turnstun_server.sh ${var.turnstun_sub_domain_name}.${var.domain_name} ${alicloud_instance.avld_turnstun_instance_ecs.public_ip} ${var.turn_user} ${var.turn_password}"
     ]
   }
 }
