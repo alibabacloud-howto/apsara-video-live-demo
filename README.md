@@ -513,12 +513,15 @@ export TF_VAR_transcoder_sub_domain_name="livevideo-transcoder"
 export TF_VAR_turnstun_sub_domain_name="livevideo-turnstun"
 export TF_VAR_webrtcgw_sub_domain_name="livevideo-webrtcgw"
 export TF_VAR_webapp_sub_domain_name="livevideo"
+export TF_VAR_certman_sub_domain_name="livevideo-certman"
 export TF_VAR_ecs_root_password="YourR00tPassword"
 export TF_VAR_turn_user="livevideo"
 export TF_VAR_turn_password="YourTurnPassw0rd"
 export TF_VAR_apsaravideolive_user_accesskey_id="avl-access-key-id"
 export TF_VAR_apsaravideolive_user_accesskey_secret="avl-access-key-secret"
 export TF_VAR_apsaravideolive_region_id="ap-southeast-1"
+export TF_VAR_apsaravideolive_pull_top_domain_name="${TF_VAR_domain_name}"
+export TF_VAR_apsaravideolive_pull_sub_domain_name="livevideo-pull"
 export TF_VAR_apsaravideolive_push_domain="livevideo-push.my-sample-domain.xyz"
 export TF_VAR_apsaravideolive_pull_domain="livevideo-pull.my-sample-domain.xyz"
 export TF_VAR_apsaravideolive_app_name="livevideo"
@@ -526,6 +529,10 @@ export TF_VAR_apsaravideolive_push_auth_primary_key="push-primary-key"
 export TF_VAR_apsaravideolive_push_auth_validity_period=1800
 export TF_VAR_apsaravideolive_pull_auth_primary_key="pull-primary-key"
 export TF_VAR_apsaravideolive_pull_auth_validity_period=1800
+export TF_VAR_lets_encrypt_email_address="your.email@example.net"
+export TF_VAR_api_user_accesskey_id="${ALICLOUD_ACCESS_KEY}"
+export TF_VAR_api_user_accesskey_secret="${ALICLOUD_SECRET_KEY}"
+export TF_VAR_api_region_id="${ALICLOUD_REGION}"
 
 # Build the base infrastructure
 cd infrastructure/00_base
@@ -551,8 +558,17 @@ terraform apply
 cd ../20_webapp
 terraform init
 terraform apply
+
+# Build the Apsara Video Live pull domain certificate manager infrastructure
+cd ../25_avl_certman
+terraform init
+terraform apply
 ```
 
-You can test the web application by browsing to its URL (e.g. http://livevideo.my-sample-domain.xyz).
+Note: the "Apsara Video Live pull domain certificate manager" is a small ECS instance in charge of automatically
+obtaining and updating the Apsara Video Live TLS/SSL certificate.
 
+You can test the web application by browsing to its URL (e.g. https://livevideo.my-sample-domain.xyz).
+
+TODO: configure HTTPS
 TODO: create a section about scaling and support (provide a contact email address).

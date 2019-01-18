@@ -1,0 +1,7 @@
+#
+# Execute the certificate updater.
+#
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+0 3 * * * root systemd-cat -t "certificate-updater" /usr/bin/python3 /opt/certificate-updater/certificate-updater.py
