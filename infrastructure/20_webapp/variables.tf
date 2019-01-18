@@ -87,3 +87,8 @@ variable "apsaravideolive_pull_auth_validity_period" {
   description = "Validity period in seconds of an authentication key for the pull domain."
   default = 1800
 }
+
+variable "lets_encrypt_email_address" {
+  description = "Email address for Let's Encrypt to notify us when a certificate is going to be expired."
+  default = "john.doe@example.net"
+}

@@ -41,6 +41,16 @@ resource "alicloud_security_group_rule" "accept_80_rule" {
   security_group_id = "${alicloud_security_group.avld_webapp_security_group.id}"
   cidr_ip = "0.0.0.0/0"
 }
+resource "alicloud_security_group_rule" "accept_443_rule" {
+  type = "ingress"
+  ip_protocol = "tcp"
+  nic_type = "intranet"
+  policy = "accept"
+  port_range = "443/443"
+  priority = 1
+  security_group_id = "${alicloud_security_group.avld_webapp_security_group.id}"
+  cidr_ip = "0.0.0.0/0"
+}
 
 // ECS instance type
 data "alicloud_instance_types" "avld_webapp_instance_types" {
@@ -57,8 +67,7 @@ data "alicloud_images" "ubuntu_images" {
   most_recent = true
 }
 
-
-// ECS instance for transcoding
+// ECS instance
 resource "alicloud_instance" "avld_webapp_ecs" {
   instance_name = "avld-webapp-ecs"
   description = "Apsara Video Live Demo (web application)."
@@ -127,6 +136,16 @@ resource "alicloud_instance" "avld_webapp_ecs" {
     source = "resources/install_webapp.sh"
     destination = "/tmp/install_webapp.sh"
   }
+}
+
+// Domain records (also add internal addresses with a "-vpc" suffix)
+resource "alicloud_dns_record" "avld_webapp_record_oversea" {
+  name = "${var.domain_name}"
+  type = "A"
+  host_record = "${var.webapp_sub_domain_name}"
+  routing = "oversea"
+  value = "${alicloud_instance.avld_webapp_ecs.public_ip}"
+  ttl = 600
 
   provisioner "remote-exec" {
     connection {
@@ -152,20 +171,12 @@ resource "alicloud_instance" "avld_webapp_ecs" {
         ${var.apsaravideolive_push_auth_primary_key} \
         ${var.apsaravideolive_push_auth_validity_period} \
         ${var.apsaravideolive_pull_auth_primary_key} \
-        ${var.apsaravideolive_pull_auth_validity_period}
+        ${var.apsaravideolive_pull_auth_validity_period} \
+        ${var.webapp_sub_domain_name}.${var.domain_name} \
+        ${var.lets_encrypt_email_address}
       EOF
     ]
   }
-}
-
-// Domain records (also add internal addresses with a "-vpc" suffix)
-resource "alicloud_dns_record" "avld_webapp_record_oversea" {
-  name = "${var.domain_name}"
-  type = "A"
-  host_record = "${var.webapp_sub_domain_name}"
-  routing = "oversea"
-  value = "${alicloud_instance.avld_webapp_ecs.public_ip}"
-  ttl = 600
 }
 resource "alicloud_dns_record" "avld_webapp_record_default" {
   name = "${var.domain_name}"
@@ -173,21 +184,5 @@ resource "alicloud_dns_record" "avld_webapp_record_default" {
   host_record = "${var.webapp_sub_domain_name}"
   routing = "default"
   value = "${alicloud_instance.avld_webapp_ecs.public_ip}"
-  ttl = 600
-}
-resource "alicloud_dns_record" "avld_webapp_private_record_oversea" {
-  name = "${var.domain_name}"
-  type = "A"
-  host_record = "${var.webapp_sub_domain_name}-vpc"
-  routing = "oversea"
-  value = "${alicloud_instance.avld_webapp_ecs.private_ip}"
-  ttl = 600
-}
-resource "alicloud_dns_record" "avld_webapp_private_record_default" {
-  name = "${var.domain_name}"
-  type = "A"
-  host_record = "${var.webapp_sub_domain_name}-vpc"
-  routing = "default"
-  value = "${alicloud_instance.avld_webapp_ecs.private_ip}"
   ttl = 600
 }

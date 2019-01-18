@@ -18,6 +18,8 @@
 # $13 = Validity period in seconds of an authentication key for the push domain.
 # $14 = Primary key for the authentication for the pull domain.
 # $15 = Validity period in seconds of an authentication key for the pull domain.
+# $16 = Sub-domain name of the web application.
+# $17 = Email address for Let's Encrypt to notify us when a certificate is going to be expired.
 #
 # The following resources are expected in the /tmp folder:
 # /tmp/nginx-webapp.conf
@@ -40,6 +42,8 @@ AVL_PUSH_AUTH_PRIMARY_KEY=${12}
 AVL_PUSH_AUTH_VALIDITY_PERIOD=${13}
 AVL_PULL_AUTH_PRIMARY_KEY=${14}
 AVL_PULL_AUTH_VALIDITY_PERIOD=${15}
+WEBAPP_DOMAIN=${16}
+EMAIL_ADDRESS=${17}
 
 echo "STUN_TURN_DOMAIN=$STUN_TURN_DOMAIN"
 echo "TURN_USERNAME=$TURN_USERNAME"
@@ -56,6 +60,8 @@ echo "AVL_PUSH_AUTH_PRIMARY_KEY=$AVL_PUSH_AUTH_PRIMARY_KEY"
 echo "AVL_PUSH_AUTH_VALIDITY_PERIOD=$AVL_PUSH_AUTH_VALIDITY_PERIOD"
 echo "AVL_PULL_AUTH_PRIMARY_KEY=$AVL_PULL_AUTH_PRIMARY_KEY"
 echo "AVL_PULL_AUTH_VALIDITY_PERIOD=$AVL_PULL_AUTH_VALIDITY_PERIOD"
+echo "WEBAPP_DOMAIN=$WEBAPP_DOMAIN"
+echo "EMAIL_ADDRESS=$EMAIL_ADDRESS"
 
 # Update the distribution
 export DEBIAN_FRONTEND=noninteractive
@@ -74,8 +80,21 @@ for bin in /usr/lib/jvm/jdk-11.0.1/bin/*; do update-alternatives --set $(basenam
 echo "Install Nginx"
 apt-get -y install nginx
 
+# Install Certbot for obtaining a Let's Encrypt certificate
+echo "Install Certbot"
+apt-get -y install software-properties-common
+add-apt-repository -y ppa:certbot/certbot
+apt-get -y update
+apt-get -y install python-certbot-nginx
+
+# Obtain the certificate
+echo "Obtaining certificate"
+certbot --nginx -d "${WEBAPP_DOMAIN}" --non-interactive --agree-tos --email "${EMAIL_ADDRESS}"
+
 # Configure Nginx
 echo "Configure Nginx"
+export ESCAPED_WEBAPP_DOMAIN=$(echo ${WEBAPP_DOMAIN} | sed -e 's/\\/\\\\/g; s/\//\\\//g; s/&/\\\&/g')
+sed -i "s/livevideo\.example\.com/${ESCAPED_WEBAPP_DOMAIN}/" /tmp/nginx-webapp.conf
 cp /tmp/nginx-webapp.conf /etc/nginx/conf.d/webapp.conf
 rm /etc/nginx/sites-enabled/default
 
