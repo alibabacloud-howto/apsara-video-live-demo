@@ -135,8 +135,13 @@ export default {
         return new Promise((resolve, reject) => {
             fetch(`/streams/${name}/pull-url`)
                 .then(result => result.text())
-                .then(
-                    result => resolve(result),
+                .then(url => {
+                        const isHttp = location.protocol !== 'https:';
+                        const protocol = isHttp ? 'http://' : 'https://';
+                        url = url.substr('http://'.length);
+                        url = protocol + url;
+                        resolve(url);
+                    },
                     error => reject('Unable to get the stream pull URL: ' + JSON.stringify(error))
                 );
         });

@@ -61926,8 +61926,12 @@ __webpack_require__.r(__webpack_exports__);
     return new Promise(function (resolve, reject) {
       fetch("/streams/".concat(name, "/pull-url")).then(function (result) {
         return result.text();
-      }).then(function (result) {
-        return resolve(result);
+      }).then(function (url) {
+        var isHttp = location.protocol !== 'https:';
+        var protocol = isHttp ? 'http://' : 'https://';
+        url = url.substr('http://'.length);
+        url = protocol + url;
+        resolve(url);
       }, function (error) {
         return reject('Unable to get the stream pull URL: ' + JSON.stringify(error));
       });
