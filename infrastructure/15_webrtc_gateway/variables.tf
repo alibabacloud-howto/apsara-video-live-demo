@@ -27,3 +27,8 @@ variable "turn_password" {
   description = "Password to authenticate to the TURN server."
   default = "YourTurnPassw0rd"
 }
+
+variable "lets_encrypt_email_address" {
+  description = "Email address for Let's Encrypt to notify us when a certificate is going to be expired."
+  default = "john.doe@example.net"
+}

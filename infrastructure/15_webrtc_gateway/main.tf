@@ -30,6 +30,16 @@ resource "alicloud_security_group_rule" "accept_22_rule" {
   security_group_id = "${alicloud_security_group.avld_webrtcgw_security_group.id}"
   cidr_ip = "0.0.0.0/0"
 }
+resource "alicloud_security_group_rule" "accept_80_rule" {
+  type = "ingress"
+  ip_protocol = "tcp"
+  nic_type = "intranet"
+  policy = "accept"
+  port_range = "80/80"
+  priority = 1
+  security_group_id = "${alicloud_security_group.avld_webrtcgw_security_group.id}"
+  cidr_ip = "0.0.0.0/0"
+}
 resource "alicloud_security_group_rule" "accept_8088-9_rule" {
   type = "ingress"
   ip_protocol = "tcp"
@@ -105,18 +115,6 @@ resource "alicloud_instance" "avld_webrtcgw_instance_ecs" {
     source = "resources/install_webrtc_gateway.sh"
     destination = "/tmp/install_webrtc_gateway.sh"
   }
-
-  provisioner "remote-exec" {
-    connection {
-      host = "${alicloud_instance.avld_webrtcgw_instance_ecs.public_ip}"
-      user = "root"
-      password = "${var.ecs_root_password}"
-    }
-    inline = [
-      "chmod +x /tmp/install_webrtc_gateway.sh",
-      "/tmp/install_webrtc_gateway.sh ${var.turnstun_sub_domain_name}-vpc.${var.domain_name} ${alicloud_instance.avld_webrtcgw_instance_ecs.public_ip} ${var.turn_user} ${var.turn_password}"
-    ]
-  }
 }
 
 // Domain records (also add internal addresses with a "-vpc" suffix)
@@ -127,6 +125,26 @@ resource "alicloud_dns_record" "avld_webrtcgw_record_oversea" {
   routing = "oversea"
   value = "${alicloud_instance.avld_webrtcgw_instance_ecs.public_ip}"
   ttl = 600
+
+  provisioner "remote-exec" {
+    connection {
+      host = "${alicloud_instance.avld_webrtcgw_instance_ecs.public_ip}"
+      user = "root"
+      password = "${var.ecs_root_password}"
+    }
+    inline = [
+      "chmod +x /tmp/install_webrtc_gateway.sh",
+      <<EOF
+      /tmp/install_webrtc_gateway.sh \
+        ${var.turnstun_sub_domain_name}-vpc.${var.domain_name} \
+        ${alicloud_instance.avld_webrtcgw_instance_ecs.public_ip} \
+        ${var.turn_user} \
+        ${var.turn_password} \
+        ${var.webrtcgw_sub_domain_name}.${var.domain_name} \
+        ${var.lets_encrypt_email_address}
+      EOF
+    ]
+  }
 }
 resource "alicloud_dns_record" "avld_webrtcgw_record_default" {
   name = "${var.domain_name}"
