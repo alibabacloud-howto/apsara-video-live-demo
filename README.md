@@ -8,6 +8,7 @@
 4. [Apsara Video Live test](#apsara-video-live-test)
 5. [Compiling and running the application locally](#compiling-and-running-the-application-locally)
 6. [Cloud installation](#cloud-installation)
+7. [Support](#support)
 
 ## Introduction
 The goal of this demo is to showcase [Apsara Video Live](https://www.alibabacloud.com/product/apsaravideo-for-live),
@@ -618,4 +619,7 @@ obtaining and updating the Apsara Video Live TLS/SSL certificate.
 
 You can test the web application by browsing to its URL (e.g. https://livevideo.my-sample-domain.xyz).
 
-TODO: create a section about scaling and support (provide a contact email address).
+TODO: create a section about scaling.
+
+## Support
+Don't hesitate to [contact us](mailto:projectdelivery@alibabacloud.com) if you have questions or remarks.
