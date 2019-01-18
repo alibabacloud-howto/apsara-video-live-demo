@@ -508,30 +508,55 @@ export ALICLOUD_ACCESS_KEY="your-accesskey-id"
 export ALICLOUD_SECRET_KEY="your-accesskey-secret"
 export ALICLOUD_REGION="your-region-id"
 
+# Top domain name
 export TF_VAR_domain_name="my-sample-domain.xyz"
+# Sub-domain name for the server that transcodes RTP streams to RTMP for Apsara Video Live
 export TF_VAR_transcoder_sub_domain_name="livevideo-transcoder"
+# Sub-domain name for the TURN / STUN server that allows users to bypass NAT firewalls for WebRTC
 export TF_VAR_turnstun_sub_domain_name="livevideo-turnstun"
+# Sub-domain name for the WebRTC gateway
 export TF_VAR_webrtcgw_sub_domain_name="livevideo-webrtcgw"
+# Sub-domain name for the web application
 export TF_VAR_webapp_sub_domain_name="livevideo"
+# Sub-domain name for the certificate manager, see the notes below this code block
 export TF_VAR_certman_sub_domain_name="livevideo-certman"
+# Root password for all ECS instances
 export TF_VAR_ecs_root_password="YourR00tPassword"
+# Username for TURN / STUN server authentication
 export TF_VAR_turn_user="livevideo"
+# Password for TURN / STUN server authentication
 export TF_VAR_turn_password="YourTurnPassw0rd"
-export TF_VAR_apsaravideolive_user_accesskey_id="avl-access-key-id"
-export TF_VAR_apsaravideolive_user_accesskey_secret="avl-access-key-secret"
-export TF_VAR_apsaravideolive_region_id="ap-southeast-1"
-export TF_VAR_apsaravideolive_pull_top_domain_name="${TF_VAR_domain_name}"
-export TF_VAR_apsaravideolive_pull_sub_domain_name="livevideo-pull"
+# Access key ID of an user that can access to Apsara Video Live
+export TF_VAR_apsaravideolive_user_accesskey_id="${ALICLOUD_ACCESS_KEY}"
+# Access key secret of a an user that can access to Apsara Video Live
+export TF_VAR_apsaravideolive_user_accesskey_secret="${ALICLOUD_SECRET_KEY}"
+# Region where we use the Apsara Video Live service
+export TF_VAR_apsaravideolive_region_id="${ALICLOUD_REGION}"
+# Push domain registered into Apsara Video Live
 export TF_VAR_apsaravideolive_push_domain="livevideo-push.my-sample-domain.xyz"
+# Pull domain registered into Apsara Video Live
 export TF_VAR_apsaravideolive_pull_domain="livevideo-pull.my-sample-domain.xyz"
+# Top part of the pull domain
+export TF_VAR_apsaravideolive_pull_top_domain_name="${TF_VAR_domain_name}"
+# sub part of the pull domain
+export TF_VAR_apsaravideolive_pull_sub_domain_name="livevideo-pull"
+# Unique name that would allow multiple applications to share the same domain in Apsara Video Live
 export TF_VAR_apsaravideolive_app_name="livevideo"
+# Primary key associated with the push domain in Apsara Video Live
 export TF_VAR_apsaravideolive_push_auth_primary_key="push-primary-key"
+# Auth key validity period associated with the push domain in Apsara Video Live
 export TF_VAR_apsaravideolive_push_auth_validity_period=1800
+# Primary key associated with the pull domain in Apsara Video Live
 export TF_VAR_apsaravideolive_pull_auth_primary_key="pull-primary-key"
+# Auth key validity period associated with the pull domain in Apsara Video Live
 export TF_VAR_apsaravideolive_pull_auth_validity_period=1800
+# Email address that will receive notifications when TLS / SSL certificates are going to expire
 export TF_VAR_lets_encrypt_email_address="your.email@example.net"
+# Access key ID of a user that can have access to the DNS and CDN OpenAPI
 export TF_VAR_api_user_accesskey_id="${ALICLOUD_ACCESS_KEY}"
+# Access key secret of a user that can have access to the DNS and CDN OpenAPI
 export TF_VAR_api_user_accesskey_secret="${ALICLOUD_SECRET_KEY}"
+# Region where the domain has been registered
 export TF_VAR_api_region_id="${ALICLOUD_REGION}"
 
 # Build the base infrastructure
@@ -565,10 +590,32 @@ terraform init
 terraform apply
 ```
 
+This script requires many parameters to be stored in environment variables:
+* `TF_VAR_domain_name` must contain the domain you must have purchased before starting this demo (see the
+  [Prerequisite section](#prerequisite)).
+* `TF_VAR_*_sub_domain_name` values can be set to anything. The most important one is `TF_VAR_webapp_sub_domain_name`;
+  for example if you set it to "livevideo", then your web application will be available at the URL
+  "https://livevideo.my-sample-domain.xyz".
+* `TF_VAR_ecs_root_password`, `TF_VAR_turn_user` and `TF_VAR_turn_password` can be set to anything. Just choose
+  hard-to-guess passwords.
+* `TF_VAR_apsaravideolive_user_accesskey_id` and `TF_VAR_apsaravideolive_user_accesskey_secret` can be related to a
+  normal user, or from a RAM user with the "AliyunLiveFullAccess" permission.
+* `TF_VAR_apsaravideolive_*_domain*` must be set to the domains you have registered in the
+  [Apsara Video Live configuration](#apsara-video-live-configuration) section.
+* `TF_VAR_apsaravideolive_app_name` can be set to anything in the format `a-zA-Z0-9_-`.
+* `TF_VAR_apsaravideolive_*_auth_primary_key` and `TF_VAR_apsaravideolive_*_auth_validity_period` must contain the
+  primary key and validity period for authentication. You must have used them in the
+  [Apsara Video Live test](#apsara-video-live-test) section.
+* We use [Let’s Encrypt](https://letsencrypt.org/) to obtain TLS / SSL certificates in order to support HTTPS.
+  `TF_VAR_lets_encrypt_email_address` must contain an email address where notifications are send when the
+  certificates are going to expire.
+* `TF_VAR_api_user_*` are used to invoke [OpenAPI](https://api.aliyun.com/) in order to update the
+  TLS / SSL certificate for the pull domain on the CDN-side. It can be related to a normal user or RAM user
+  allowed to access DNS and CDN APIs.
+
 Note: the "Apsara Video Live pull domain certificate manager" is a small ECS instance in charge of automatically
 obtaining and updating the Apsara Video Live TLS/SSL certificate.
 
 You can test the web application by browsing to its URL (e.g. https://livevideo.my-sample-domain.xyz).
 
-TODO: configure HTTPS
 TODO: create a section about scaling and support (provide a contact email address).
