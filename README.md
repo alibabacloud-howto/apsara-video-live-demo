@@ -8,7 +8,8 @@
 4. [Apsara Video Live test](#apsara-video-live-test)
 5. [Compiling and running the application locally](#compiling-and-running-the-application-locally)
 6. [Cloud installation](#cloud-installation)
-7. [Support](#support)
+7. [Evolution](#evolution)
+8. [Support](#support)
 
 ## Introduction
 The goal of this demo is to showcase [Apsara Video Live](https://www.alibabacloud.com/product/apsaravideo-for-live),
@@ -96,8 +97,8 @@ web application:
 Before building the application, we need to register two domains in Apsara Video Live, one for sending data
 (push domain), one for receiving (pull domain):
 * Go to the [Apsara Video Live console](https://live.console.aliyun.com/);
-* Click on the "Domain Names" left menu item;
-* Click on the "Add new domain" button;
+* Click on the "Domains" left menu item;
+* Click on the "Add Domain" button;
 * Fill the form with the following parameters:
   * Domain Name = choose a sub-domain name such as "livevideo-push.my-sample-domain.xyz" with "push" in it
   * Live Center = the closest region the the users who will broadcast their video
@@ -111,7 +112,7 @@ Your domain should appear in the table:
 ![Domain added](images/avl-domain-name-added.png)
 
 Redo the same operation to create a streaming domain name:
-* Click on the "Add new domain" button;
+* Click on the "Add Domain" button;
 * Fill the form with the following parameters:
   * Domain Name = choose a sub-domain name such as "livevideo-pull.my-sample-domain.xyz" with "pull" in it
   * Live Center = the closest region the the users who will watch the videos
@@ -167,15 +168,14 @@ Your DNS entries should be similar to this:
 
 We now need to link the "push" and "pull" domains together:
 * Go back to your domain names list in the [Apsara Video Live console](https://live.console.aliyun.com/);
-* Next to your "pull" domain, click on the "Configure" link;
-* In the new page, click on the button with the "pen" icon for "Stream Pushing Information > 
-  Ingest Domain Name";
+* Next to your "pull" domain, click on the "Domain Settings" link;
+* In the new page, go to the "Stream Ingest Information" tab and click on the button "Add Stream Ingest Information";
 * In the popup, select your "push" domain (e.g. livevideo-push.my-sample-domain.xyz) and click on "OK".
 
 Finally, we need to add some HTTP header configuration in order to solve
 [CORS problems](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS):
 * Go back to your domain names list in the [Apsara Video Live console](https://live.console.aliyun.com/);
-* Next to your "pull" domain, click on the "Configure" link;
+* Next to your "pull" domain, click on the "Domain Settings" link;
 * In the new page, click on the "HTTP Header Settings" left menu item;
 * Click on the "Add" button; in the new popup, select the `Access-Control-Allow-Origin` header, and set the value `*`;
 * Click on OK to confirm; the configuration should look like this:
@@ -240,7 +240,8 @@ the status bar at the bottom of OBS should look like this:
 
 ![OBS status bar while streaming](images/obs-status-bar-while-streaming.png)
 
-Keep OBS running in the background. With your web browser, go back to the Apsara Video Live console:
+Keep OBS running in the background. With your web browser, go back to the
+[Apsara Video Live console](https://live.console.aliyun.com/):
 * Click on the "Stream Management > Ingest Endpoints" menu item; you should be able to see your "sample-stream":
 
   ![Sample stream in Apsara Video Live](images/avl-ingest-endpoint-sample-stream.png)
@@ -358,15 +359,15 @@ ffmpeg
 ```
 If your system doesn't have FFMPEG or has an old version, you need to install it:
 * On Ubuntu Linux, you can install FFMPEG with the following commands:
-  ```bash
-  sudo add-apt-repository ppa:jonathonf/ffmpeg-4
-  sudo apt-get update
-  sudo apt-get install ffmpeg
-  ```
+```bash
+sudo add-apt-repository ppa:jonathonf/ffmpeg-4
+sudo apt-get update
+sudo apt-get install ffmpeg
+```
 * On Mac OSX, you can install FFMPEG with the following commands:
-  ```bash
-  brew install ffmpeg
-  ```
+```bash
+brew install ffmpeg
+```
 
 Download this repository on your computer, open the file "transcoder/src/main/resources/application.properties":
 ```properties
@@ -619,7 +620,8 @@ obtaining and updating the Apsara Video Live TLS/SSL certificate.
 
 You can test the web application by browsing to its URL (e.g. https://livevideo.my-sample-domain.xyz).
 
-TODO: create a section about scaling.
+## Evolution
+TODO: scaling.
 
 ## Support
 Don't hesitate to [contact us](mailto:projectdelivery@alibabacloud.com) if you have questions or remarks.
