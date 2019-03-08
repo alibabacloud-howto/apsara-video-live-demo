@@ -359,12 +359,14 @@ ffmpeg
 ```
 If your system doesn't have FFMPEG or has an old version, you need to install it:
 * On Ubuntu Linux, you can install FFMPEG with the following commands:
+
 ```bash
 sudo add-apt-repository ppa:jonathonf/ffmpeg-4
 sudo apt-get update
 sudo apt-get install ffmpeg
 ```
 * On Mac OSX, you can install FFMPEG with the following commands:
+
 ```bash
 brew install ffmpeg
 ```
