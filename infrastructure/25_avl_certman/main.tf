@@ -45,7 +45,7 @@ resource "alicloud_security_group_rule" "accept_80_rule" {
 // ECS instance type
 data "alicloud_instance_types" "avld_certman_instance_types" {
   cpu_core_count = 1
-  memory_size = 0.5
+  memory_size = 1
   availability_zone = "${data.alicloud_vswitches.avld_vswitches.vswitches.0.zone_id}"
   network_type = "Vpc"
 }
