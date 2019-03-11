@@ -761,8 +761,8 @@ to use the IP address contained in the REST response to bypass the server load b
 to keep communicating with the same ECS instance until the end of the video session.
 In fact this solution can also be used for Coturn, the STUN / TURN server.
 
-Finally, Apsara Video Live is the only part of our solution that doesn't need to be modified in order to make it ready
-for high-availability and scalability, as it is built-in in this service!
+Finally, Apsara Video Live is the only part of our solution that doesn't need to be modified, because it is already
+highly available and scalable!
 
 ## Support
 Don't hesitate to [contact us](mailto:projectdelivery@alibabacloud.com) if you have questions or remarks.
