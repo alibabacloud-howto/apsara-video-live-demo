@@ -753,7 +753,11 @@ The WebRTC gateway (running Janus) must be modified in order to make it scalable
 transcoding server: add a small REST service on each Janus ECS instance responsible for sending the public IP address
 of the current machine. This allows us to use a
 [server load balancer](https://www.alibabacloud.com/product/server-load-balancer) with several ECS instances, and then
-to use the IP address contained in the REST response to bypass this server load balancer for WebRTC data.
+to use the IP address contained in the REST response to bypass this server load balancer for WebRTC connections.
+In fact this solution can also be used for Coturn, the STUN / TURN server.
+
+Finally, Apsara Video Live is the only part of our solution that doesn't need to be modified in order to make it ready
+for high-availability and scalability, as it is built-in in this service!
 
 ## Support
 Don't hesitate to [contact us](mailto:projectdelivery@alibabacloud.com) if you have questions or remarks.
