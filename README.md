@@ -723,11 +723,11 @@ journalctl --unit=certificate-updater
 
 ## Evolution
 The goal of this demo is to showcase how to use Apsara Video Live for both sending and receiving video streams.
-However, to keep it simple, this demo is not scalable. The goal of this section is to provide some ideas about how to
-modify this application in order to build a scalable highly available architecture.
+However, to keep the demo simple and easy to understand, scalability is out of scope. The goal of this section is
+to provide some ideas about how to modify this application in order to build a scalable highly available architecture.
 
 In order to build an highly available architecture, each server in the backend must be running on several
-ECS instances. The goal is to allow the system to continue to work even if one server is down or overloaded.
+ECS instances. The goal is to allow the system to continue to function properly even if one server is unreachable.
 
 The web application is the easiest one to adapt: by introducing a
 [server load balancer](https://www.alibabacloud.com/product/server-load-balancer), you can run the web application on
@@ -741,13 +741,17 @@ explains how to configure HTTPS with an highly-available architecture.
 Unfortunately the part that deals with WebRTC to RTMP conversion is harder to scale, as it requires customization.
 However, the transcoding server is in fact ready for it, because of the way it is designed:
 * When a new video stream is starting, a "new-rtp-forwarding-destination" request is sent to the transcoding server.
-* The server decides which ports should be used for video & audio signals, then return a response containing the ports
-  AND the public IP address of this server. This IP address is very important, because it allows us to put a
+* The server decides which ports should be used for video & audio signals, then returns a response containing the ports
+  AND the public IP address of this server. This IP address is important, because it allows us to put a
   [server load balancer](https://www.alibabacloud.com/product/server-load-balancer) in front of the ECS instance
   that hosts the transcoding server: the IP address allows us to bypass the server load balancer and to keep talking
   with the same ECS instance when sending video streams.
 * Janus (the WebRTC gateway) is instructed to send the video stream to the same transcoding server which has prepared
   the ports for video & audio signals.
+
+> Note: as you can see, the server load balancer allows us to setup the transcoding server on several ECS instances.
+> The public IP address returned in the "new-rtp-forwarding-destination" response allows us to keep talking with the
+> same ECS instance until the end of the video streaming session.
 
 The WebRTC gateway (running Janus) must be modified in order to make it scalable. One solution is to do like with the
 transcoding server: add a small REST service on each Janus ECS instance responsible for sending the public IP address
