@@ -8,8 +8,9 @@
 4. [Apsara Video Live test](#apsara-video-live-test)
 5. [Compiling and running the application locally](#compiling-and-running-the-application-locally)
 6. [Cloud installation](#cloud-installation)
-7. [Evolution](#evolution)
-8. [Support](#support)
+7. [Debugging](#debugging)
+8. [Evolution](#evolution)
+9. [Support](#support)
 
 ## Introduction
 The goal of this demo is to showcase [Apsara Video Live](https://www.alibabacloud.com/product/apsaravideo-for-live),
@@ -611,7 +612,7 @@ This script requires many parameters to be stored in environment variables:
   primary key and validity period for authentication. You must have used them in the
   [Apsara Video Live test](#apsara-video-live-test) section.
 * We use [Let’s Encrypt](https://letsencrypt.org/) to obtain TLS / SSL certificates in order to support HTTPS.
-  `TF_VAR_lets_encrypt_email_address` must contain an email address where notifications are send when the
+  `TF_VAR_lets_encrypt_email_address` must contain an email address where notifications are sent when the
   certificates are going to expire.
 * `TF_VAR_api_user_*` are used to invoke [OpenAPI](https://api.aliyun.com/) in order to update the
   TLS / SSL certificate for the pull domain on the CDN-side. It can be related to a normal user or RAM user
@@ -621,6 +622,97 @@ Note: the "Apsara Video Live pull domain certificate manager" is a small ECS ins
 obtaining and updating the Apsara Video Live TLS/SSL certificate.
 
 You can test the web application by browsing to its URL (e.g. https://livevideo.my-sample-domain.xyz).
+
+## Debugging
+This demo involves a lot of elements that can break, this section explains how to quickly spot problems.
+
+In order to debug the full process, we will open two web browser tabs: one for broadcasting video, the other one
+to play it:
+* Open a web browser tab to the application (e.g. https://livevideo.my-sample-domain.xyz) and click on the
+  "Broadcast my video" button.
+* Open the [web developer console](https://developer.mozilla.org/en-US/docs/Tools/Web_Console/Opening_the_Web_Console),
+  this allows us to see frontend logs.
+* Set a stream name and click on the "Start" button. Many logs are displayed in the web developer console: usually
+  connection errors can be easily found there.
+* Open another web browser tab and go to your application (e.g. https://livevideo.my-sample-domain.xyz). You should
+  normally see your stream.
+
+If you cannot see your stream it means that the problem has great chances to be located on the broadcasting part,
+which is the most complex one.
+
+If you can see your stream, then there are great chances that the problem comes from the video playback part. Open the
+[web developer console](https://developer.mozilla.org/en-US/docs/Tools/Web_Console/Opening_the_Web_Console) and click
+on the stream name: if the video is not displayed, check the logs printed in the web developer console, they should
+contain the errors.
+
+When the error comes from the broadcasting part, we should check if the video stream reaches Apsara Video Live:
+* Go to the [Apsara Video Live console](https://live.console.aliyun.com/).
+* On the left menu, click on the "Stream Management > Ingest Endpoints" item. All the current streams should be
+  displayed there.
+  
+If your stream is missing, it means the problem should come from earlier in the broadcasting part (the video stream
+doesn't reach Apsara Video Live). On the other hand, if the stream is present, you can click on it and try to play it
+from the [Apsara Video Live console](https://live.console.aliyun.com/). Usually when the stream is present but you
+can't read it, it means that there is a problem on the video playback part, which can be due to bad network: in
+this case you can try again from a different computer, like an ECS instance located in the region where Apsara Video
+Live center is located (use [VNC](https://en.wikipedia.org/wiki/Virtual_Network_Computing) to access to this
+ECS instance).
+
+The element right before Apsara Video Live is the transcoding server. Let's check the logs, open a terminal on your
+computer an connect to this server via SSH:
+```bash
+# Connect to the transcoding server
+ssh root@livevideo-transcoder.my-sample-domain.xyz
+
+# Check that both Nginx and the transcoder are running
+systemctl | grep nginx
+systemctl | grep transcoder
+```
+Both of them should have the `running` status. To check the logs of the services use the following commands:
+```bash
+# Check the logs of nginx
+journalctl --unit=nginx
+cat /var/log/nginx/error.log
+
+# Check the logs of the transcoder
+journalctl --unit=transcoder
+```
+These logs usually contain clear error messages that allows us to spot a problem if any.
+
+Problems can also arise at upper layers. Here is how to check other servers logs:
+* For Janus (WebRTC Gateway):
+```bash
+# Connect to the server
+ssh root@livevideo-webrtcgw.my-sample-domain.xyz
+
+# Check Janus logs
+journalctl --unit=janus
+```
+* For Coturn (STUN / TURN server):
+```bash
+# Connect to the server
+ssh root@livevideo-turnstun.my-sample-domain.xyz
+
+# Check Coturn logs
+journalctl --unit=coturn
+cat /var/log/turn_*.log
+```
+* For the web application backend:
+```bash
+# Connect to the server
+ssh root@livevideo.my-sample-domain.xyz
+
+# Check the logs
+journalctl --unit=webapp
+```
+* For the certificate manager:
+```bash
+# Connect to the server
+ssh root@livevideo-certman.my-sample-domain.xyz
+
+# Check the logs
+journalctl --unit=certificate-updater
+```
 
 ## Evolution
 TODO: scaling.
