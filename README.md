@@ -624,17 +624,16 @@ obtaining and updating the Apsara Video Live TLS/SSL certificate.
 You can test the web application by browsing to its URL (e.g. https://livevideo.my-sample-domain.xyz).
 
 ## Debugging
-This demo involves a lot of elements that can break, this section explains how to quickly spot problems.
+This demo involves a lot of elements that can break, this section explains how to quickly find problems.
 
-In order to debug the full process, we will open two web browser tabs: one for broadcasting video, the other one
-to play it:
-* Open a web browser tab to the application (e.g. https://livevideo.my-sample-domain.xyz) and click on the
+In order to debug the full process, we will open two web browser tabs: one for broadcasting video, one to play it:
+* Open a web browser tab with the application (e.g. https://livevideo.my-sample-domain.xyz) and click on the
   "Broadcast my video" button.
 * Open the [web developer console](https://developer.mozilla.org/en-US/docs/Tools/Web_Console/Opening_the_Web_Console),
   this allows us to see frontend logs.
 * Set a stream name and click on the "Start" button. Many logs are displayed in the web developer console: usually
   connection errors can be easily found there.
-* Open another web browser tab and go to your application (e.g. https://livevideo.my-sample-domain.xyz). You should
+* Open another web browser tab and go to the application (e.g. https://livevideo.my-sample-domain.xyz). You should
   normally see your stream.
 
 If you cannot see your stream it means that the problem has great chances to be located on the broadcasting part,
@@ -650,13 +649,13 @@ When the error comes from the broadcasting part, we should check if the video st
 * On the left menu, click on the "Stream Management > Ingest Endpoints" item. All the current streams should be
   displayed there.
   
-If your stream is missing, it means the problem should come from earlier in the broadcasting part (the video stream
-doesn't reach Apsara Video Live). On the other hand, if the stream is present, you can click on it and try to play it
-from the [Apsara Video Live console](https://live.console.aliyun.com/). Usually when the stream is present but you
-can't read it, it means that there is a problem on the video playback part, which can be due to bad network: in
-this case you can try again from a different computer, like an ECS instance located in the region where Apsara Video
-Live center is located (use [VNC](https://en.wikipedia.org/wiki/Virtual_Network_Computing) to access to this
-ECS instance).
+If your stream is missing, it means that the problem should come from an earlier step in the broadcasting process (the
+video stream doesn't reach Apsara Video Live). On the other hand, if the stream is present, you can click on it and
+try to play it from the [Apsara Video Live console](https://live.console.aliyun.com/). Usually when the stream is
+present but you can't read it, it means that there is a problem on the video playback part, which can be due to bad
+network: in this case you can try again from a different computer, like an ECS instance located in the region where
+Apsara Video Live center is located (use [VNC](https://en.wikipedia.org/wiki/Virtual_Network_Computing) to access to
+this ECS instance).
 
 The element right before Apsara Video Live is the transcoding server. Let's check the logs, open a terminal on your
 computer an connect to this server via SSH:
