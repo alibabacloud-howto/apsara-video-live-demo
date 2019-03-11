@@ -726,14 +726,14 @@ The goal of this demo is to showcase how to use Apsara Video Live for both sendi
 However, to keep it simple, this demo is not scalable. The goal of this section is to provide some ideas about how to
 modify this application in order to build a scalable highly available architecture.
 
-In order to build an highly available architecture, each server in the backend must be executed on several
-ECS instances. The goal is to allow the system to continue to run even if one server is down or overloaded.
+In order to build an highly available architecture, each server in the backend must be running on several
+ECS instances. The goal is to allow the system to continue to work even if one server is down or overloaded.
 
-The web application is the easiest one to adapt: let users to access to your application through a
-[server load balancer](https://www.alibabacloud.com/product/server-load-balancer), then configure it to redirect
-the HTTP traffic to at least two ECS instance that run the web application backend. In addition, if you need
-auto-scaling, you can create an [auto scaling group](https://www.alibabacloud.com/product/auto-scaling) that will
-create / delete ECS instances automatically according to the load. However, this solution makes HTTPS configuration
+The web application is the easiest one to adapt: by introducing a
+[server load balancer](https://www.alibabacloud.com/product/server-load-balancer), you can run the web application on
+two or more ECS instances. In addition, if you need auto-scaling, you can create an
+[auto scaling group](https://www.alibabacloud.com/product/auto-scaling) that will create / delete ECS instances
+automatically according to the load. However, this solution makes HTTPS configuration
 more complex, as SSL / TLS certificates will need to be moved from the ECS instances to the server load balancer.
 [This tutorial](https://alibabacloud-howto.github.io/devops/tutorials/devops_for_small_to_medium_web_applications/part_05_https_configuration.html)
 explains how to configure HTTPS with an highly-available architecture.
