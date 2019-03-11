@@ -70,11 +70,10 @@ apt-get -y upgrade
 
 # Install JDK 11
 echo "Install OpenJDK 11"
-apt-get -y install default-jdk
-wget https://download.java.net/java/GA/jdk11/13/GPL/openjdk-11.0.1_linux-x64_bin.tar.gz -O /tmp/openjdk-11.tar.gz
-tar xfvz /tmp/openjdk-11.tar.gz --directory /usr/lib/jvm
-for bin in /usr/lib/jvm/jdk-11.0.1/bin/*; do update-alternatives --install /usr/bin/$(basename ${bin}) $(basename ${bin}) ${bin} 100; done
-for bin in /usr/lib/jvm/jdk-11.0.1/bin/*; do update-alternatives --set $(basename ${bin}) ${bin}; done
+apt-get -y install software-properties-common
+add-apt-repository -y ppa:openjdk-r/ppa
+apt-get update
+apt-get -y install openjdk-11-jre-headless
 
 # Install Nginx
 echo "Install Nginx"
@@ -82,9 +81,8 @@ apt-get -y install nginx
 
 # Install Certbot for obtaining a Let's Encrypt certificate
 echo "Install Certbot"
-apt-get -y install software-properties-common
 add-apt-repository -y ppa:certbot/certbot
-apt-get -y update
+apt-get update
 apt-get -y install python-certbot-nginx
 
 # Obtain the certificate
