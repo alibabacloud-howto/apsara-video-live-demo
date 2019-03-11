@@ -739,8 +739,8 @@ more complex, as SSL / TLS certificates will need to be moved from the ECS insta
 explains how to configure HTTPS with an highly-available architecture.
 
 Unfortunately the part that deals with WebRTC to RTMP conversion is harder to scale, as it requires customization.
-However, The transcoding server is in fact ready for it, because of the way it has been designed:
-* When a new video stream is starting, a "new-rtp-forwarding-destination" request is sent to the server.
+However, the transcoding server is in fact ready for it, because of the way it is designed:
+* When a new video stream is starting, a "new-rtp-forwarding-destination" request is sent to the transcoding server.
 * The server decides which ports should be used for video & audio signals, then return a response containing the ports
   AND the public IP address of this server. This IP address is very important, because it allows us to put a
   [server load balancer](https://www.alibabacloud.com/product/server-load-balancer) in front of the ECS instance
@@ -748,6 +748,12 @@ However, The transcoding server is in fact ready for it, because of the way it h
   with the same ECS instance when sending video streams.
 * Janus (the WebRTC gateway) is instructed to send the video stream to the same transcoding server which has prepared
   the ports for video & audio signals.
+
+The WebRTC gateway (running Janus) must be modified in order to make it scalable. One solution is to do like with the
+transcoding server: add a small REST service on each Janus ECS instance responsible for sending the public IP address
+of the current machine. This allows us to use a
+[server load balancer](https://www.alibabacloud.com/product/server-load-balancer) with several ECS instances, and then
+to use the IP address contained in the REST response to bypass this server load balancer for WebRTC data.
 
 ## Support
 Don't hesitate to [contact us](mailto:projectdelivery@alibabacloud.com) if you have questions or remarks.
