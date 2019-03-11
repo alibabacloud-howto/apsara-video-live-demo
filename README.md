@@ -650,8 +650,8 @@ When the error comes from the broadcasting part, we should check if the video st
   displayed there.
   
 If your stream is missing, it means that the problem should come from an earlier step in the broadcasting process (the
-video stream doesn't reach Apsara Video Live). On the other hand, if the stream is present, you can click on it and
-try to play it from the [Apsara Video Live console](https://live.console.aliyun.com/). Usually when the stream is
+video stream doesn't reach Apsara Video Live). On the other hand, if the stream is present, you can click on its
+"View URLs" link and play it by hovering one of the URL and by clicking on the "Play" link. Usually when the stream is
 present but you can't read it, it means that there is a problem on the video playback part, which can be due to bad
 network: in this case you can try again from a different computer, like an ECS instance located in the region where
 Apsara Video Live center is located (use [VNC](https://en.wikipedia.org/wiki/Virtual_Network_Computing) to access to
@@ -680,6 +680,7 @@ These logs usually contain clear error messages that allows us to spot a problem
 
 Problems can also arise at upper layers. Here is how to check other servers logs:
 * For Janus (WebRTC Gateway):
+
 ```bash
 # Connect to the server
 ssh root@livevideo-webrtcgw.my-sample-domain.xyz
@@ -687,7 +688,9 @@ ssh root@livevideo-webrtcgw.my-sample-domain.xyz
 # Check Janus logs
 journalctl --unit=janus
 ```
+
 * For Coturn (STUN / TURN server):
+
 ```bash
 # Connect to the server
 ssh root@livevideo-turnstun.my-sample-domain.xyz
@@ -696,15 +699,20 @@ ssh root@livevideo-turnstun.my-sample-domain.xyz
 journalctl --unit=coturn
 cat /var/log/turn_*.log
 ```
+
 * For the web application backend:
+
 ```bash
 # Connect to the server
 ssh root@livevideo.my-sample-domain.xyz
 
 # Check the logs
+cat /var/log/nginx/error.log
 journalctl --unit=webapp
 ```
+
 * For the certificate manager:
+
 ```bash
 # Connect to the server
 ssh root@livevideo-certman.my-sample-domain.xyz
